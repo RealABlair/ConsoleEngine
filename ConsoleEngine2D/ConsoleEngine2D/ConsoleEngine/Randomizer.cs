@@ -10,9 +10,9 @@ namespace ConsoleEngine
     {
         static Random rnd = new Random();
 
-        public static byte RandomByte(byte min, byte max) => (byte)rnd.Next(min, max);
+        public static byte RandomByte(byte min, byte max) => (byte)rnd.Next(min, max + 1);
 
-        public static int RandomInt(int min, int max) => rnd.Next(min, max);
+        public static int RandomInt(int min, int max) => rnd.Next(min, max + 1);
 
         public static double RandomDouble(double min, double max) => min + rnd.NextDouble() * max;
 

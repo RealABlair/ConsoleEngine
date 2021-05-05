@@ -35,7 +35,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,9 +45,12 @@
   <ItemGroup>
     <Compile Include="ABSoftware\KLIN.cs" />
     <Compile Include="ABSoftware\KLINToken.cs" />
+    <Compile Include="Class1.cs" />
     <Compile Include="ConsoleEngine\Display.cs" />
     <Compile Include="ConsoleEngine\Engine.cs" />
+    <Compile Include="ConsoleEngine\FrameTimer.cs" />
     <Compile Include="ConsoleEngine\Glyph.cs" />
+    <Compile Include="ConsoleEngine\GlyphRenderer.cs" />
     <Compile Include="ConsoleEngine\Keyboard.cs" />
     <Compile Include="ConsoleEngine\Maths.cs" />
     <Compile Include="ConsoleEngine\Pixel.cs" />
@@ -56,8 +58,8 @@
     <Compile Include="ConsoleEngine\Randomizer.cs" />
     <Compile Include="ConsoleEngine\Timer.cs" />
     <Compile Include="ConsoleEngine\Windows.cs" />
-    <Compile Include="Parabalan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Thing.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

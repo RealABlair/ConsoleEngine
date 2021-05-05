@@ -30,7 +30,7 @@ namespace ConsoleEngine
             Pixel p = new Pixel();
             p.R = (byte)(decimalColor >> 16 & 255);
             p.G = (byte)(decimalColor >> 8 & 255);
-            p.B = (byte)(decimalColor& 255);
+            p.B = (byte)(decimalColor & 255);
             return p;
         }
 

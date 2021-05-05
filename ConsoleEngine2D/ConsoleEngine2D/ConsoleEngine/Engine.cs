@@ -22,21 +22,24 @@ namespace ConsoleEngine
 
 
 
-        //User Booleans
+        //User Things
+        public GlyphRenderer glyphRenderer = new GlyphRenderer();
+
         public bool DoubleChar = false;
         public bool UpdateWithoutFocusing = true;
 
 
-
-        public void Construct(int Width, int Height, int framerate = 1)
+        public void Construct(int Width, int Height, int framerate = -1)
         {
             AppName = GetType().Name;
             ScreenWidth = Width;
             ScreenHeight = Height;
             Console.SetWindowSize(Width, Height);
+            glyphRenderer.Init(Width, Height, this);
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             pixels = new Pixel[Width * Height];
+
             for (int i = 0; i < pixels.Length; i++)
             {
                 pixels[i] = new Pixel();
@@ -56,6 +59,11 @@ namespace ConsoleEngine
             startTime = 0;
             gameLoop = new Thread(GameLoop);
             gameLoop.Start();
+        }
+
+        public void Stop()
+        {
+            gameLoop.Join(100);
         }
 
         public void GameLoop()
@@ -79,6 +87,10 @@ namespace ConsoleEngine
 
         public void Resize(int width, int height)
         {
+            pixels = new Pixel[width * height];
+            glyphRenderer.Init(width, height, this);
+            ScreenWidth = width;
+            ScreenHeight = height;
             Console.SetWindowSize(width, height);
         }
 
@@ -104,12 +116,22 @@ namespace ConsoleEngine
             {
                 for (int x = 0; x < ScreenWidth; x++)
                 {
-                    Pixel p = GetPixel(x, y);
-                    if(!DoubleChar)
-                        scrn += Colorize(" ", p, ColorType.Background);
+                    Glyph g = glyphRenderer.GetGlyph(x, y);
+                    if(g != null)
+                    {
+                        if (!DoubleChar)
+                            scrn += Colorize(g.glyph.ToString(), g.foregroundColor, ColorType.BackForeground, g.backgroundColor);
+                        else
+                            scrn += Colorize(g.glyph.ToString() + g.glyph.ToString(), g.foregroundColor, ColorType.BackForeground, g.backgroundColor);
+                    }
                     else
-                        scrn += Colorize("  ", p, ColorType.Background);
-
+                    {
+                        Pixel p = GetPixel(x, y);
+                        if (!DoubleChar)
+                            scrn += Colorize(" ", p, ColorType.Background);
+                        else
+                            scrn += Colorize("  ", p, ColorType.Background);
+                    }
                 }
                 scrn += "\n";
             }
@@ -118,7 +140,7 @@ namespace ConsoleEngine
 
         public void Draw(int x, int y, Pixel p)
         {
-            if (y * ScreenWidth + x >= pixels.Length || x < 0 || y < 0)
+            if (x > ScreenWidth - 1 || y > ScreenHeight - 1 || x < 0 || y < 0)
                 return;
             pixels[y * ScreenWidth + x] = p;
         }

@@ -8,8 +8,8 @@ namespace ConsoleEngine
 {
     public class Glyph
     {
-        public char glyph;
-        public Pixel foregroundColor;
-        public Pixel backgroundColor;
+        public char glyph = ' ';
+        public Pixel foregroundColor = Pixel.Black;
+        public Pixel backgroundColor = Pixel.Black;
     }
 }

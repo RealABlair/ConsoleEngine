@@ -1,0 +1,7 @@
+#KLIN version 1.0b
+playerX=8
+playerY=8
+playerAngle=0
+fov=45
+speedMultiplier=0,5
+#END
