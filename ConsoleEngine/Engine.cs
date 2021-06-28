@@ -25,7 +25,6 @@ namespace ConsoleEngine
 
         //User Things
         public GlyphRenderer glyphRenderer = new GlyphRenderer();
-        public Quality quality = Quality.Slow;
 
         public bool UpdateWithoutFocusing = true;
 
@@ -257,14 +256,6 @@ namespace ConsoleEngine
         public virtual void OnCreate() { }
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
-        #endregion
-
-        #region Enums
-        public enum Quality : int
-        {
-            Fast,
-            Slow
-        }
         #endregion
     }
 }
