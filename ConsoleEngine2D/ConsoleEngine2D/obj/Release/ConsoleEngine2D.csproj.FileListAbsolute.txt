@@ -1,7 +1,0 @@
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\bin\Release\ConsoleEngine2D.exe.config
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\bin\Release\ConsoleEngine2D.exe
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\bin\Release\ConsoleEngine2D.pdb
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\obj\Release\ConsoleEngine2D.csprojAssemblyReference.cache
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\obj\Release\ConsoleEngine2D.csproj.CoreCompileInputs.cache
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\obj\Release\ConsoleEngine2D.exe
-C:\Users\Aleksandr\source\repos\ConsoleEngine2D\ConsoleEngine2D\obj\Release\ConsoleEngine2D.pdb
