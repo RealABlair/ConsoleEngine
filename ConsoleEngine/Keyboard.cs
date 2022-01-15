@@ -1,20 +1,27 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
-namespace ConsoleEngine
+namespace ABSoftware
 {
     public class Keyboard
     {
-        // FOR CONSOLE APPLICATIONS USE:
         [DllImport("user32.dll")]
         public static extern int GetAsyncKeyState(int vKeys);
 
         [DllImport("USER32.dll")]
         public static extern short GetKeyState(int nVirtKey);
+
+        [DllImport("user32.dll")]
+        static extern void keybd_event(int nVirtKey, byte bScan, uint dwFlags, int dwExtraInfo);
+
+        static List<int> KEYS_CONSTS { get { return ScanKeysConsts(); } }
+
+        static bool[] LastKeysStamp;
 
         public struct Keys
         {
@@ -194,5 +201,128 @@ namespace ConsoleEngine
             public const int VK_PA1 = 0xFD;
             public const int VK_OEM_CLEAR = 0xFE;
         }
+
+        static List<int> ScanKeysConsts()
+        {
+            List<int> l = new List<int>();
+            Type KeysType = typeof(Keys);
+            FieldInfo[] fields = KeysType.GetFields();
+            for (int i = 0; i < fields.Length; i++)
+            {
+                FieldInfo fi = fields[i];
+                l.Add((int)fi.GetValue(fi.Name));
+            }
+            return l;
+        }
+
+        public static uint KEYEVENTF_KEYDOWN = 0x0000;
+        public static uint KEYEVENTF_KEYUP = 0x0002;
+        public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+
+        public static void PressKey(int VK_KEY)
+        {
+            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYDOWN, 0);
+        }
+
+        public static void ReleaseKey(int VK_KEY)
+        {
+            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYUP, 0);
+        }
+
+        public static void UpdateKeys()
+        {
+            int KeysConstsCount = KEYS_CONSTS.Count;
+
+            bool newLKS = false; //the 'LastKeysStamp' was just created
+
+            if (LastKeysStamp == null)
+            {
+                LastKeysStamp = new bool[KeysConstsCount];
+                newLKS = true;
+            }
+
+            bool[] NewKeysStamp = new bool[KeysConstsCount];
+
+            for (int i = 0; i < KeysConstsCount; i++)
+            {
+                int currentVK_KEY = GetVK(i);
+                bool newState = GetAsyncKeyState(currentVK_KEY) != 0;
+                bool prevState = false;
+                NewKeysStamp[i] = newState;
+                if (newLKS)
+                {
+                    if (!prevState && newState)
+                    {
+                        if (OnKeyDown != null)
+                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                    }
+                }
+                else
+                {
+                    prevState = LastKeysStamp[i];
+                    if (!prevState && newState)
+                    {
+                        if (OnKeyDown != null)
+                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                    }
+                    else if (prevState && !newState)
+                    {
+                        if (OnKeyUp != null)
+                            OnKeyUp.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                    }
+                    else if (prevState && newState)
+                    {
+                        if (OnKeyHeld != null)
+                            OnKeyHeld.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                    }
+                }
+            }
+            NewKeysStamp.CopyTo(LastKeysStamp, 0);
+        }
+
+        public static string GetVKName(int VK_KEY)
+        {
+            Type KeysType = typeof(Keys);
+            FieldInfo[] fields = KeysType.GetFields();
+            for (int i = 0; i < fields.Length; i++)
+            {
+                string Name = fields[i].Name;
+                int value = (int)fields[i].GetValue(Name);
+                if (value.Equals(VK_KEY))
+                    return Name;
+                continue;
+            }
+            return null;
+        }
+
+        public static int GetVK(string VK_Name)
+        {
+            Type KeysType = typeof(Keys);
+            FieldInfo[] fields = KeysType.GetFields();
+            for (int i = 0; i < fields.Length; i++)
+            {
+                string Name = fields[i].Name;
+                int value = (int)fields[i].GetValue(Name);
+                if (Name.Equals(VK_Name))
+                    return value;
+                continue;
+            }
+            return -1;
+        }
+
+        public static int GetVK(int VK_ID)
+        {
+            Type KeysType = typeof(Keys);
+            FieldInfo[] fields = KeysType.GetFields();
+            string Name = fields[VK_ID].Name;
+            int value = (int)fields[VK_ID].GetValue(Name);
+            return value;
+        }
+
+        public delegate void KeyEvent(string VK_Name, int VK_KEY);
+
+        public static event KeyEvent OnKeyDown;
+        public static event KeyEvent OnKeyUp;
+        public static event KeyEvent OnKeyHeld;
     }
 }
