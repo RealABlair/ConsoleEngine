@@ -54,6 +54,8 @@ namespace ConsoleEngine
         public void Start()
         {
             Init();
+            HandlerInit(ConsoleEventCallback);
+            SetCtrlHandler(handler, true);
             Console.CursorVisible = false;
             enabled = true;
             startTime = 0;
@@ -76,8 +78,9 @@ namespace ConsoleEngine
                     if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
                         continue;
 
-                    OnUpdate((float)(DateTime.Now - lastUpdateTime).TotalMilliseconds);
-                    lastUpdateTime = DateTime.Now;
+                    DateTime dt = DateTime.Now;
+                    OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
+                    lastUpdateTime = dt;
                     Redraw();
                     startTime++;
                 }
@@ -365,9 +368,9 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCircle(int x, int y, int width, int height, Pixel p)
+        public void DrawCircle(int x, int y, int width, int height, Pixel p, double stepSize = 0.05)
         {
-            for (double angle = 0.0001; angle < Maths.DegreesToRadians(360); angle += 0.05)
+            for (double angle = 0; angle < Maths.DegreesToRadians(360); angle += stepSize)
             {
                 int px = (int)(x + width * Math.Cos(angle));
                 int py = (int)(y + height * Math.Sin(angle));
@@ -388,8 +391,22 @@ namespace ConsoleEngine
             }
         }
 
+
+        bool ConsoleEventCallback(int eventType)
+        {
+            if (eventType == 2)
+            {
+                OnDestroy();
+            }
+            return false;
+        }
+
         #region Overrides
         public virtual void OnCreate() { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elapsedTime">The time since last update in seconds</param>
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
