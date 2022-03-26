@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,16 +68,21 @@ namespace ConsoleEngine
         public void GameLoop()
         {
             OnCreate();
-            while (enabled)
+            while(enabled)
             {
-                if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
-                    continue;
+                while (enabled)
+                {
+                    if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
+                        continue;
 
-                DateTime dt = DateTime.Now;
-                OnUpdate((float)(dt - lastUpdateTime).TotalMilliseconds);
-                lastUpdateTime = dt;
-                Redraw();
-                startTime++;
+                    DateTime dt = DateTime.Now;
+                    OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
+                    lastUpdateTime = dt;
+                    Redraw();
+                    startTime++;
+                }
+
+                OnDestroy();
             }
         }
 
@@ -96,7 +101,7 @@ namespace ConsoleEngine
 
         public void Clear(char pixel)
         {
-            for (int i = 0; i < pixels.Length; i++)
+            for(int i = 0; i < pixels.Length; i++)
             {
                 pixels[i] = pixel;
             }
@@ -172,7 +177,7 @@ namespace ConsoleEngine
 
         public void FillRect(int x, int y, int width, int height, char p)
         {
-            for (int X = 0; X < width; X++)
+            for(int X = 0; X < width; X++)
             {
                 for (int Y = 0; Y < height; Y++)
                 {
@@ -340,7 +345,7 @@ namespace ConsoleEngine
 
         public void DrawCurve(Point[] points, char p)
         {
-            for (int i = 0; i < points.Length; i++)
+            for(int i = 0; i < points.Length; i++)
             {
                 Draw(points[i].x, points[i].y, p);
             }
@@ -351,9 +356,9 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCircle(int x, int y, int width, int height, char p, double stepSize = 0.05)
+        public void DrawCircle(int x, int y, int width, int height, char p)
         {
-            for (double angle = 0.0001; angle < Maths.DegreesToRadians(360); angle += stepSize)
+            for (double angle = 0; angle < Maths.DegreesToRadians(360); angle += 0.05)
             {
                 int px = (int)(x + width * Math.Cos(angle));
                 int py = (int)(y + height * Math.Sin(angle));
@@ -386,6 +391,10 @@ namespace ConsoleEngine
 
         #region Overrides
         public virtual void OnCreate() { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elapsedTime">The time since last update in seconds</param>
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
