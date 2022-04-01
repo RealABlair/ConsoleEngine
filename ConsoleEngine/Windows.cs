@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,6 +45,10 @@ namespace ConsoleEngine
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetCursorPos(out POINT lpPoint);
 
+        public delegate bool ConsoleEventDelegate(int eventType);
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
+
         #endregion
 
         #region Consts
@@ -54,7 +58,7 @@ namespace ConsoleEngine
         public const int STD_INPUT_HANDLE = -10;
         public const int STD_OUTPUT_HANDLE = -11;
         public const int STD_ERROR_HANDLE = -12;
-            
+
 
         public const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
         public const uint ENABLE_QUICK_EDIT = 0x0040;
