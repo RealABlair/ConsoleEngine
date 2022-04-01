@@ -39,7 +39,7 @@ namespace ConsoleEngine
 
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = new char();
+                pixels[i] = ' ';
             }
         }
 
