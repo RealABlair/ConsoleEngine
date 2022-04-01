@@ -39,6 +39,7 @@ namespace ConsoleEngine
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             pixels = new Pixel[Width * Height];
+            this.lastUpdateTime = DateTime.Now;
 
             for (int i = 0; i < pixels.Length; i++)
             {
