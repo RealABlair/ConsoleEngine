@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,6 +18,13 @@ namespace ConsoleEngine
 
         public int SCREEN_WIDTH { get { return GetSystemMetrics(0); } }
         public int SCREEN_HEIGHT { get { return GetSystemMetrics(1); } }
+
+        public ConsoleEventDelegate handler;
+
+        public void HandlerInit(Func<int, bool> myMethodName)
+        {
+            handler = new ConsoleEventDelegate(myMethodName);
+        }
 
         public void Init()
         {
@@ -59,9 +66,13 @@ namespace ConsoleEngine
 
         public void Move(int x, int y, int width, int height)
         {
-            MoveWindow(GetConsoleWindow(), x, y, width, height, false);
+            MoveWindow(GetConsoleWindow(), x, y, width, height, true);
         }
 
+        public void SetCtrlHandler(ConsoleEventDelegate callback, bool add)
+        {
+            SetConsoleCtrlHandler(callback, add);
+        }
 
         public RECT GetClientRectangle()
         {
