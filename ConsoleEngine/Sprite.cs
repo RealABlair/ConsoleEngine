@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using ABSoftware;
-using System.Linq;
 
 namespace ConsoleEngine
 {
@@ -58,16 +57,16 @@ namespace ConsoleEngine
             byteBuilder.Append(BitConverter.GetBytes(Height));
             byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PALETTE));
             List<Pixel> palette = ReadPalette();
-            for (int i = 0; i < palette.Count; i++)
+            for(int i = 0; i < palette.Count; i++)
             {
                 byteBuilder.Append(new byte[] { palette[i].R, palette[i].G, palette[i].B });
             }
             byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PIXELS));
-            for (int x = 0; x < Width; x++)
+            for(int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    byteBuilder.Append(BitConverter.GetBytes(palette.IndexOf(GetPixel(x, y))));
+                    byteBuilder.Append(BitConverter.GetBytes(palette.IndexOf(GetPixel(x,y))));
                 }
             }
             byteBuilder.Append(BitConverter.GetBytes((short)Chunks.END));
@@ -117,14 +116,9 @@ namespace ConsoleEngine
         {
             List<Pixel> pixs = new List<Pixel>();
 
-            bool has(Pixel pix)
+            for(int i = 0; i < pixels.Length; i++)
             {
-                return pixs.FirstOrDefault(p => Equals(p, pix)) != null;
-            }
-
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                if (!has(pixels[i]))
+                if (!pixs.Contains(pixels[i]))
                     pixs.Add(pixels[i]);
             }
             return pixs;
