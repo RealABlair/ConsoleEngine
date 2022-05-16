@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 using System.IO;
-
+using System.Collections.Generic;
+using ABSoftware;
+using System.Linq;
 
 namespace ConsoleEngine
 {
@@ -36,59 +34,100 @@ namespace ConsoleEngine
             return pixels[y * Width + x];
         }
 
-        
+        public Pixel SamplePixel(float x, float y, float xOffset = 0f, float yOffset = -1f)
+        {
+            int sx = (int)(x * (Width + xOffset));
+            int sy = (int)(y * (Height + yOffset));
+            if (sx < 0 || sx > Width || sy < 0 || sy > Height)
+                return Pixel.Black;
+            else
+                return pixels[sy * Width + sx];
+        }
+
         public Sprite(string fileName)
         {
-            byte[] bytes = File.ReadAllBytes(fileName);
-            this.Width = BitConverter.ToInt32(new byte[] { bytes[0], bytes[1], bytes[2], bytes[3] }, 0);
-            this.Height = BitConverter.ToInt32(new byte[] { bytes[4], bytes[5], bytes[6], bytes[7] }, 0);
-            this.pixels = new Pixel[this.Width * this.Height];
-            for(int i = 0; i < this.Width * this.Height; i++)
-            {
-                pixels[i] = Pixel.FromDec(BitConverter.ToInt32(new byte[] { bytes[i * 4 + 8], bytes[i * 4 + 9], bytes[i * 4 + 10], bytes[i * 4 + 11] }, 0));
-            }
+            Load(fileName);
         }
 
         public void Save(string fileName)
         {
-            byte[] bytes = new byte[CalculateTotalBytes()];
-            byte[] wdth = BitConverter.GetBytes(Width);
-            byte[] hght = BitConverter.GetBytes(Height);
-            bytes[0] = wdth[0];
-            bytes[1] = wdth[1];
-            bytes[2] = wdth[2];
-            bytes[3] = wdth[3];
-            bytes[4] = hght[0];
-            bytes[5] = hght[1];
-            bytes[6] = hght[2];
-            bytes[7] = hght[3];
+            ByteBuilder byteBuilder = new ByteBuilder();
+            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.START));
+            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.SIZE));
+            byteBuilder.Append(BitConverter.GetBytes(Width));
+            byteBuilder.Append(BitConverter.GetBytes(Height));
+            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PALETTE));
+            List<Pixel> palette = ReadPalette();
+            for (int i = 0; i < palette.Count; i++)
+            {
+                byteBuilder.Append(new byte[] { palette[i].R, palette[i].G, palette[i].B });
+            }
+            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PIXELS));
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    byteBuilder.Append(BitConverter.GetBytes(palette.IndexOf(GetPixel(x, y))));
+                }
+            }
+            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.END));
+            File.WriteAllBytes(fileName, byteBuilder.ToArray());
+        }
+
+        public void Load(string fileName)
+        {
+            ByteBuilder byteBuilder = new ByteBuilder();
+            byteBuilder.Append(File.ReadAllBytes(fileName));
+            int startIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.START));
+            int endIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.END));
+            if (startIndex < 0 || endIndex < startIndex)
+                return;
+
+            Width = BitConverter.ToInt32(byteBuilder.GetRange(startIndex + 4, 4), 0);
+            Height = BitConverter.ToInt32(byteBuilder.GetRange(startIndex + 8, 4), 0);
+            pixels = new Pixel[Width * Height];
+            Pixel[] palette = new Pixel[Width * Height];
+            for (int i = 0; i < palette.Length; i++)
+            {
+                byte[] color = byteBuilder.GetRange(startIndex + 14 + (i * 3), 3);
+                palette[i] = Pixel.FromRGB(color[0], color[1], color[2]);
+            }
+            int pixelsIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.PIXELS));
+            int pixelId = 0;
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    SetPixel(x, y, palette[BitConverter.ToInt32(byteBuilder.GetRange(pixelsIndex + 2 + (4 * pixelId), 4), 0)]);
+                    pixelId++;
+                }
+            }
+        }
+
+        enum Chunks : short
+        {
+            START = 0x4130,
+            SIZE = 0x4135,
+            PALETTE = 0x4140,
+            PIXELS = 0x4150,
+            END = 0x4160
+        }
+
+        List<Pixel> ReadPalette()
+        {
+            List<Pixel> pixs = new List<Pixel>();
+
+            bool has(Pixel pix)
+            {
+                return pixs.FirstOrDefault(p => Equals(p, pix)) != null;
+            }
+
             for (int i = 0; i < pixels.Length; i++)
             {
-                Pixel p = pixels[i];
-                byte[] pixelBytes = BitConverter.GetBytes(GetPixelDec(p));
-                bytes[i * 4 + 8] = pixelBytes[0];
-                bytes[i * 4 + 9] = pixelBytes[1];
-                bytes[i * 4 + 10] = pixelBytes[2];
-                bytes[i * 4 + 11] = pixelBytes[3];
+                if (!has(pixels[i]))
+                    pixs.Add(pixels[i]);
             }
-            File.WriteAllBytes(fileName, bytes);
-        }
-
-        int GetPixelDec(Pixel pixel)
-        {
-            int dec = 0;
-            dec += (int)pixel.R << 16;
-            dec += (int)pixel.G << 8;
-            dec += (int)pixel.B;
-            return dec;
-        }
-
-        int CalculateTotalBytes()
-        {
-            int ret = 0;
-            ret += 8;
-            ret += pixels.Length * 4;
-            return ret;
+            return pixs;
         }
     }
 }
