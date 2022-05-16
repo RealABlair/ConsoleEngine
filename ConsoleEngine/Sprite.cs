@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using ABSoftware;
@@ -66,7 +66,7 @@ namespace ConsoleEngine
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    byteBuilder.Append(BitConverter.GetBytes(palette.IndexOf(GetPixel(x, y))));
+                    byteBuilder.Append(((UInt24)(UInt32)palette.IndexOf(GetPixel(x, y))).ToByteArray());
                 }
             }
             byteBuilder.Append(BitConverter.GetBytes((short)Chunks.END));
@@ -97,7 +97,7 @@ namespace ConsoleEngine
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    SetPixel(x, y, palette[BitConverter.ToInt32(byteBuilder.GetRange(pixelsIndex + 2 + (4 * pixelId), 4), 0)]);
+                    SetPixel(x, y, palette[((UInt24)(byteBuilder.GetRange(pixelsIndex + 2 + (3 * pixelId), 3))).Value]);
                     pixelId++;
                 }
             }
@@ -110,6 +110,36 @@ namespace ConsoleEngine
             PALETTE = 0x4140,
             PIXELS = 0x4150,
             END = 0x4160
+        }
+
+        struct UInt24 //24bit value | 3 bytes
+        {
+            private Byte b0, b1, b2;
+
+            public UInt24(UInt32 value)
+            {
+                b0 = (byte)((value) & 0xFF);
+                b1 = (byte)((value >> 8) & 0xFF);
+                b2 = (byte)((value >> 16) & 0xFF);
+            }
+
+            public UInt24(byte[] data)
+            {
+                b0 = data[2];
+                b1 = data[1];
+                b2 = data[0];
+            }
+
+            public UInt32 Value { get { return (UInt32)(b0 | (b1 << 8) | (b2 << 16)); } }
+
+            public byte[] ToByteArray()
+            {
+                return new byte[] { b2, b1, b0 };
+            }
+
+            public static explicit operator UInt24(byte[] data) => new UInt24(data);
+            public static explicit operator UInt24(UInt32 value) => new UInt24(value);
+            public static implicit operator UInt32(UInt24 value) => value.Value;
         }
 
         List<Pixel> ReadPalette()
