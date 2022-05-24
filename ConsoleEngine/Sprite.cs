@@ -51,17 +51,17 @@ namespace ConsoleEngine
         public void Save(string fileName)
         {
             ByteBuilder byteBuilder = new ByteBuilder();
-            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.START));
-            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.SIZE));
+            byteBuilder.Append(BitConverter.GetBytes((uint)Chunks.START));
+            byteBuilder.Append(BitConverter.GetBytes((uint)Chunks.SIZE));
             byteBuilder.Append(BitConverter.GetBytes(Width));
             byteBuilder.Append(BitConverter.GetBytes(Height));
-            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PALETTE));
+            byteBuilder.Append(BitConverter.GetBytes((uint)Chunks.PALETTE));
             List<Pixel> palette = ReadPalette();
             for (int i = 0; i < palette.Count; i++)
             {
                 byteBuilder.Append(new byte[] { palette[i].R, palette[i].G, palette[i].B });
             }
-            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.PIXELS));
+            byteBuilder.Append(BitConverter.GetBytes((uint)Chunks.PIXELS));
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
@@ -69,7 +69,7 @@ namespace ConsoleEngine
                     byteBuilder.Append(((UInt24)(UInt32)palette.IndexOf(GetPixel(x, y))).ToByteArray());
                 }
             }
-            byteBuilder.Append(BitConverter.GetBytes((short)Chunks.END));
+            byteBuilder.Append(BitConverter.GetBytes((uint)Chunks.END));
             File.WriteAllBytes(fileName, byteBuilder.ToArray());
         }
 
@@ -77,8 +77,8 @@ namespace ConsoleEngine
         {
             ByteBuilder byteBuilder = new ByteBuilder();
             byteBuilder.Append(File.ReadAllBytes(fileName));
-            int startIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.START));
-            int endIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.END));
+            int startIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.START));
+            int endIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.END));
             if (startIndex < 0 || endIndex < startIndex)
                 return;
 
@@ -91,7 +91,7 @@ namespace ConsoleEngine
                 byte[] color = byteBuilder.GetRange(startIndex + 14 + (i * 3), 3);
                 palette[i] = Pixel.FromRGB(color[0], color[1], color[2]);
             }
-            int pixelsIndex = byteBuilder.IndexOf(BitConverter.GetBytes((short)Chunks.PIXELS));
+            int pixelsIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.PIXELS));
             int pixelId = 0;
             for (int x = 0; x < Width; x++)
             {
@@ -103,13 +103,13 @@ namespace ConsoleEngine
             }
         }
 
-        enum Chunks : short
+        enum Chunks : uint
         {
-            START = 0x4130,
-            SIZE = 0x4135,
-            PALETTE = 0x4140,
-            PIXELS = 0x4150,
-            END = 0x4160
+            START = 0x00413000,
+            SIZE = 0x00413500,
+            PALETTE = 0x00414000,
+            PIXELS = 0x00415000,
+            END = 0x00416000
         }
 
         struct UInt24 //24bit value | 3 bytes
