@@ -81,14 +81,15 @@ namespace ConsoleEngine
             int endIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.END));
             if (startIndex < 0 || endIndex < startIndex)
                 return;
-
-            Width = BitConverter.ToInt32(byteBuilder.GetRange(startIndex + 4, 4), 0);
-            Height = BitConverter.ToInt32(byteBuilder.GetRange(startIndex + 8, 4), 0);
+            int sizeIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.SIZE));
+            Width = BitConverter.ToInt32(byteBuilder.GetRange(sizeIndex + 4, 4), 0);
+            Height = BitConverter.ToInt32(byteBuilder.GetRange(sizeIndex + 8, 4), 0);
             pixels = new Pixel[Width * Height];
             Pixel[] palette = new Pixel[Width * Height];
+            int paletteIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.PALETTE));
             for (int i = 0; i < palette.Length; i++)
             {
-                byte[] color = byteBuilder.GetRange(startIndex + 14 + (i * 3), 3);
+                byte[] color = byteBuilder.GetRange(paletteIndex + 4 + (i * 3), 3);
                 palette[i] = Pixel.FromRGB(color[0], color[1], color[2]);
             }
             int pixelsIndex = byteBuilder.IndexOf(BitConverter.GetBytes((uint)Chunks.PIXELS));
@@ -97,7 +98,7 @@ namespace ConsoleEngine
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    SetPixel(x, y, palette[((UInt24)(byteBuilder.GetRange(pixelsIndex + 2 + (3 * pixelId), 3))).Value]);
+                    SetPixel(x, y, palette[((UInt24)(byteBuilder.GetRange(pixelsIndex + 4 + (3 * pixelId), 3))).Value]);
                     pixelId++;
                 }
             }
