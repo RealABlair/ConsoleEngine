@@ -104,6 +104,19 @@ namespace ConsoleEngine
             }
         }
 
+        public Sprite GetRange(int x, int y, int width, int height)
+        {
+            Sprite s = new Sprite(width, height);
+            for(int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    s.SetPixel(i, j, GetPixel(x+i, y+j));
+                }
+            }
+            return s;
+        }
+
         enum Chunks : uint
         {
             START = 0x00413000,
