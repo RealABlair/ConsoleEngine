@@ -359,7 +359,7 @@ namespace ConsoleEngine
 
         public void DrawCircle(int x, int y, int width, int height, char p)
         {
-            for (double angle = 0; angle < Maths.DegreesToRadians(360); angle += 0.05)
+            for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += 0.05)
             {
                 int px = (int)(x + width * Math.Cos(angle));
                 int py = (int)(y + height * Math.Sin(angle));
