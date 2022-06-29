@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using ABSoftware;
-
+using System.Diagnostics;
 
 namespace ConsoleEngine
 {
@@ -21,11 +21,14 @@ namespace ConsoleEngine
         DateTime lastUpdateTime;
         public string AppName { get { return Console.Title; } set { Console.Title = value; } }
 
-
-
         //User Things
         public bool UpdateWithoutFocusing = true;
+        public RenderType currentRenderType { get; private set; }
 
+        public void SetRenderType(RenderType renderType)
+        {
+            currentRenderType = renderType;
+        }
 
         public void Construct(int Width, int Height, int framerate = -1)
         {
@@ -35,12 +38,12 @@ namespace ConsoleEngine
             Console.SetWindowSize(Width, Height);
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
+            lastUpdateTime = DateTime.Now;
             pixels = new char[Width * Height];
-            this.lastUpdateTime = DateTime.Now;
 
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = ' ';
+                pixels[i] = new char();
             }
         }
 
@@ -69,7 +72,7 @@ namespace ConsoleEngine
         public void GameLoop()
         {
             OnCreate();
-            while(enabled)
+            while (enabled)
             {
                 while (enabled)
                 {
@@ -102,7 +105,7 @@ namespace ConsoleEngine
 
         public void Clear(char pixel)
         {
-            for(int i = 0; i < pixels.Length; i++)
+            for (int i = 0; i < pixels.Length; i++)
             {
                 pixels[i] = pixel;
             }
@@ -122,7 +125,20 @@ namespace ConsoleEngine
                 }
                 VisualOutput.ScreenBuilder.AppendLine();
             }
-            Console.WriteLine(VisualOutput.ScreenBuilder.ToString());
+            switch(currentRenderType)
+            {
+                case RenderType.Default:
+                    {
+                        Console.WriteLine(VisualOutput.ScreenBuilder.ToString());
+                    }
+                    break;
+                case RenderType.Stream:
+                    {
+                        VisualOutput.WriteLine(VisualOutput.ScreenBuilder.ToString());
+                        VisualOutput.Flush();
+                    }
+                    break;
+            }
         }
 
         public void Draw(int x, int y, char p)
@@ -178,7 +194,7 @@ namespace ConsoleEngine
 
         public void FillRect(int x, int y, int width, int height, char p)
         {
-            for(int X = 0; X < width; X++)
+            for (int X = 0; X < width; X++)
             {
                 for (int Y = 0; Y < height; Y++)
                 {
@@ -346,7 +362,7 @@ namespace ConsoleEngine
 
         public void DrawCurve(Point[] points, char p)
         {
-            for(int i = 0; i < points.Length; i++)
+            for (int i = 0; i < points.Length; i++)
             {
                 Draw(points[i].x, points[i].y, p);
             }
@@ -399,5 +415,11 @@ namespace ConsoleEngine
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
+    }
+
+    public enum RenderType
+    {
+        Default = 0,
+        Stream = 1
     }
 }
