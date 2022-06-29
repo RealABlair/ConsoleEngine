@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using static ConsoleEngine.Windows;
 
@@ -13,8 +11,8 @@ namespace ConsoleEngine
     {
         public bool isFocused { get { return (GetConsoleWindow() == GetForegroundWindow()); } }
 
-        public int PIXEL_HEIGHT = 16;
-        public int PIXEL_WIDTH = 8;
+        public const int PIXEL_HEIGHT = 16;
+        public const int PIXEL_WIDTH = 8;
 
         public int SCREEN_WIDTH { get { return GetSystemMetrics(0); } }
         public int SCREEN_HEIGHT { get { return GetSystemMetrics(1); } }
@@ -29,11 +27,12 @@ namespace ConsoleEngine
         public void Init()
         {
             var iStdOut = GetStdHandle(STD_OUTPUT_HANDLE); GetConsoleMode(iStdOut, out var outConsoleMode); SetConsoleMode(iStdOut, outConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX));
         }
 
         public string Colorize(string text, Pixel color, ColorType type, Pixel EXTENDED = null)
         {
-            if (type == ColorType.BackForeground && EXTENDED != null)
+            if(type == ColorType.BackForeground && EXTENDED != null)
                 return $"\x1b[{48};2;{EXTENDED.R};{EXTENDED.G};{EXTENDED.B}m\x1b[{38};2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
             return $"\x1b[{(byte)type};2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
         }
@@ -46,8 +45,6 @@ namespace ConsoleEngine
             ConsoleFontInfo.dwFontSize.X = (short)Width;
             ConsoleFontInfo.dwFontSize.Y = (short)Height;
             SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, ref ConsoleFontInfo);
-            PIXEL_WIDTH = Width;
-            PIXEL_HEIGHT = Height;
         }
 
         public void QuickEditMode(bool Enable)
