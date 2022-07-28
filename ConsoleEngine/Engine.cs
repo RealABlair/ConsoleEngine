@@ -18,7 +18,7 @@ namespace ConsoleEngine
         Thread gameLoop;
         Timer frameTimer;
         long startTime;
-        DateTime lastUpdateTime;
+        DateTime lastUpdateTime = DateTime.Now;
         public string AppName { get { return Console.Title; } set { Console.Title = value; } }
 
 
