@@ -118,11 +118,12 @@ namespace ConsoleEngine
             VisualOutput.ScreenBuilder.Clear();
             for (int y = 0; y < ScreenHeight; y++)
             {
-                for (int x = 0; x < ScreenWidth; x++)
+                /*for (int x = 0; x < ScreenWidth; x++)
                 {
                     char p = GetPixel(x, y);
                     VisualOutput.ScreenBuilder.Append(p);
-                }
+                }*/
+                VisualOutput.ScreenBuilder.AppendLine(new string(pixels, ScreenWidth * y, ScreenWidth));
                 VisualOutput.ScreenBuilder.AppendLine();
             }
             switch(currentRenderType)
