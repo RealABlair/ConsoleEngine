@@ -124,7 +124,7 @@ namespace ConsoleEngine
                     VisualOutput.ScreenBuilder.Append(p);
                 }*/
                 VisualOutput.ScreenBuilder.AppendLine(new string(pixels, ScreenWidth * y, ScreenWidth));
-                VisualOutput.ScreenBuilder.AppendLine();
+                //VisualOutput.ScreenBuilder.AppendLine();
             }
             switch(currentRenderType)
             {
