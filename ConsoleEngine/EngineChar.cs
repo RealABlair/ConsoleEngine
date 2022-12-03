@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using ABSoftware;
-using System.Diagnostics;
 
 namespace ConsoleEngine
 {
@@ -66,6 +61,7 @@ namespace ConsoleEngine
 
         public void Stop()
         {
+            enabled = false;
             gameLoop.Join(100);
         }
 
@@ -126,7 +122,7 @@ namespace ConsoleEngine
                 VisualOutput.ScreenBuilder.AppendLine(new string(pixels, ScreenWidth * y, ScreenWidth));
                 //VisualOutput.ScreenBuilder.AppendLine();
             }
-            switch(currentRenderType)
+            switch (currentRenderType)
             {
                 case RenderType.Default:
                     {
