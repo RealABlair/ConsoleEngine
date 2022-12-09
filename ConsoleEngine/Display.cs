@@ -31,7 +31,12 @@ namespace ConsoleEngine
         public string Colorize(string text, Pixel color, ColorType type, Pixel EXTENDED = null)
         {
             if(type == ColorType.BackForeground && EXTENDED != null)
-                return $"\x1b[{48};2;{EXTENDED.R};{EXTENDED.G};{EXTENDED.B}m\x1b[{38};2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
+                return $"\x1b[48;2;{EXTENDED.R};{EXTENDED.G};{EXTENDED.B}m\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
+            return Colorize(text, color, type);
+        }
+
+        public string Colorize(string text, Pixel color, ColorType type)
+        {
             return $"\x1b[{(byte)type};2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
         }
 
