@@ -21,11 +21,6 @@ namespace ConsoleEngine
         DateTime lastUpdateTime = DateTime.Now;
         public string AppName { get { return Console.Title; } set { Console.Title = value; } }
 
-
-
-        //User Things
-        public GlyphRenderer glyphRenderer = new GlyphRenderer();
-
         public bool UpdateWithoutFocusing = true;
 
 
@@ -35,11 +30,9 @@ namespace ConsoleEngine
             ScreenWidth = Width;
             ScreenHeight = Height;
             Console.SetWindowSize(Width, Height);
-            glyphRenderer.Init(Width, Height, this);
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             pixels = new Pixel[Width * Height];
-            this.lastUpdateTime = DateTime.Now;
 
             for (int i = 0; i < pixels.Length; i++)
             {
@@ -93,7 +86,6 @@ namespace ConsoleEngine
         public void Resize(int width, int height)
         {
             pixels = new Pixel[width * height];
-            glyphRenderer.Init(width, height, this);
             ScreenWidth = width;
             ScreenHeight = height;
             Console.SetWindowSize(width, height);
@@ -121,16 +113,8 @@ namespace ConsoleEngine
             {
                 for (int x = 0; x < ScreenWidth; x++)
                 {
-                    Glyph g = glyphRenderer.GetGlyph(x, y);
-                    if (g != null)
-                    {
-                        VisualOutput.ScreenBuilder.Append(Colorize(g.glyph.ToString(), g.foregroundColor, ColorType.BackForeground, g.backgroundColor));
-                    }
-                    else
-                    {
-                        Pixel p = GetPixel(x, y);
-                        VisualOutput.ScreenBuilder.Append(Colorize(" ", p, ColorType.Background, default));
-                    }
+                    Pixel p = GetPixel(x, y);
+                    VisualOutput.ScreenBuilder.Append(Colorize(" ", p, ColorType.Background));
                 }
                 VisualOutput.ScreenBuilder.AppendLine();
             }
@@ -371,7 +355,7 @@ namespace ConsoleEngine
 
         public void DrawCircle(int x, int y, int width, int height, Pixel p, double stepSize = 0.05)
         {
-            for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += stepSize)
+            for (double angle = 0; angle < Maths.DegreesToRadians(360); angle += stepSize)
             {
                 int px = (int)(x + width * Math.Cos(angle));
                 int py = (int)(y + height * Math.Sin(angle));
@@ -404,10 +388,6 @@ namespace ConsoleEngine
 
         #region Overrides
         public virtual void OnCreate() { }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="elapsedTime">The time since last update in seconds</param>
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
