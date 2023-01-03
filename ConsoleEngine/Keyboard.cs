@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -17,7 +17,7 @@ namespace ABSoftware
         public static extern short GetKeyState(int nVirtKey);
 
         [DllImport("user32.dll")]
-        static extern void keybd_event(int nVirtKey, byte bScan, uint dwFlags, int dwExtraInfo);
+        static extern void keybd_event(int nVirtKey, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
         static List<int> KEYS_CONSTS { get { return ScanKeysConsts(); } }
 
@@ -213,20 +213,6 @@ namespace ABSoftware
                 l.Add((int)fi.GetValue(fi.Name));
             }
             return l;
-        }
-
-        public static uint KEYEVENTF_KEYDOWN = 0x0000;
-        public static uint KEYEVENTF_KEYUP = 0x0002;
-        public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
-
-        public static void PressKey(int VK_KEY)
-        {
-            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYDOWN, 0);
-        }
-
-        public static void ReleaseKey(int VK_KEY)
-        {
-            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYUP, 0);
         }
 
         public static void UpdateKeys()

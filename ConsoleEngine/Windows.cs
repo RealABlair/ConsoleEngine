@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,7 +51,10 @@ namespace ConsoleEngine
         public delegate bool ConsoleEventDelegate(int eventType);
         [DllImport(KERNEL, SetLastError = true)]
         public static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
-
+        [DllImport(KERNEL, EntryPoint = "WriteConsoleOutputW", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool WriteConsoleOutput(IntPtr ConsoleOutput, [MarshalAs(UnmanagedType.LPArray), In] CHAR_INFO[] lpBuffer, COORD dwBufferSize, COORD dwBufferCoord, ref SMALL_RECT lpWriteRegion);
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool SetConsoleWindowInfo(IntPtr hConsoleOutput, bool bAbsolute, [In] ref SMALL_RECT lpConsoleWindow);
         #endregion
 
         #region Consts
@@ -90,6 +93,22 @@ namespace ConsoleEngine
             public int right;
             public int bottom;
         }
+        public struct SMALL_RECT
+        {
+            public SMALL_RECT(short Left, short Top, short Right, short Bottom)
+            {
+                this.Left = Left;
+                this.Top = Top;
+                this.Right = Right;
+                this.Bottom = Bottom;
+            }
+
+            public short Left;
+            public short Top;
+            public short Right;
+            public short Bottom;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct COORD
         {
@@ -149,6 +168,17 @@ namespace ConsoleEngine
             WS_TABSTOP = 0x10000,
             WS_VISIBLE = 0x10000000,
             WS_VSCROLL = 0x200000
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct CHAR_INFO
+        {
+            [FieldOffset(0)]
+            public short UnicodeChar;
+            [FieldOffset(0)]
+            public short AsciiChar;
+            [FieldOffset(2)] //2 bytes seems to work properly
+            public UInt16 Attributes;
         }
         #endregion
     }

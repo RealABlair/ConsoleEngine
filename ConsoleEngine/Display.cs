@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
-
+using System.Text;
 using static ConsoleEngine.Windows;
 
 namespace ConsoleEngine
@@ -17,6 +17,8 @@ namespace ConsoleEngine
 
         public ConsoleEventDelegate handler;
 
+        public IntPtr ConsoleHandle = IntPtr.Zero;
+
         public void HandlerInit(Func<int, bool> myMethodName)
         {
             handler = new ConsoleEventDelegate(myMethodName);
@@ -24,21 +26,12 @@ namespace ConsoleEngine
 
         public void Init()
         {
+            this.ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
             var iStdOut = GetStdHandle(STD_OUTPUT_HANDLE); GetConsoleMode(iStdOut, out var outConsoleMode); SetConsoleMode(iStdOut, outConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
             SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX));
         }
 
-        public string Colorize(string text, Pixel color, ColorType type, Pixel EXTENDED = null)
-        {
-            if(type == ColorType.BackForeground && EXTENDED != null)
-                return $"\x1b[48;2;{EXTENDED.R};{EXTENDED.G};{EXTENDED.B}m\x1b[38;2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
-            return Colorize(text, color, type);
-        }
-
-        public string Colorize(string text, Pixel color, ColorType type)
-        {
-            return $"\x1b[{(byte)type};2;{color.R};{color.G};{color.B}m{text}\x1b[0m";
-        }
+        readonly StringBuilder sb = new StringBuilder();
 
         public void ChangeFont(int Width, int Height, string FontName = "Consolas")
         {
@@ -191,11 +184,40 @@ namespace ConsoleEngine
 
         }
 
-        public enum ColorType : byte
-        {
-            Foreground = 38,
-            Background = 48,
-            BackForeground = 48 | 38
-        }
+        #region Colors
+        public const ushort FG_BLACK = 0x0000;
+        public const ushort FG_DARK_BLUE = 0x0001;
+        public const ushort FG_DARK_GREEN = 0x0002;
+        public const ushort FG_DARK_CYAN = 0x0003;
+        public const ushort FG_DARK_RED = 0x0004;
+        public const ushort FG_DARK_MAGENTA = 0x0005;
+        public const ushort FG_DARK_YELLOW = 0x0006;
+        public const ushort FG_GRAY = 0x0007;
+        public const ushort FG_DARK_GRAY = 0x0008;
+        public const ushort FG_BLUE = 0x0009;
+        public const ushort FG_GREEN = 0x000A;
+        public const ushort FG_CYAN = 0x000B;
+        public const ushort FG_RED = 0x000C;
+        public const ushort FG_MAGENTA = 0x000D;
+        public const ushort FG_YELLOW = 0x000E;
+        public const ushort FG_WHITE = 0x000F;
+
+        public const ushort BG_BLACK = 0x0000;
+        public const ushort BG_DARK_BLUE = 0x0010;
+        public const ushort BG_DARK_GREEN = 0x0020;
+        public const ushort BG_DARK_CYAN = 0x0030;
+        public const ushort BG_DARK_RED = 0x0040;
+        public const ushort BG_DARK_MAGENTA = 0x0050;
+        public const ushort BG_DARK_YELLOW = 0x0060;
+        public const ushort BG_GRAY = 0x0070;
+        public const ushort BG_DARK_GRAY = 0x0080;
+        public const ushort BG_BLUE = 0x0090;
+        public const ushort BG_GREEN = 0x00A0;
+        public const ushort BG_CYAN = 0x00B0;
+        public const ushort BG_RED = 0x00C0;
+        public const ushort BG_MAGENTA = 0x00D0;
+        public const ushort BG_YELLOW = 0x00E0;
+        public const ushort BG_WHITE = 0x00F0;
+        #endregion
     }
 }

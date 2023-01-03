@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Threading;
 using ABSoftware;
+using static ConsoleEngine.Windows;
 
 namespace ConsoleEngine
 {
-    public abstract class EngineChar : Display
+    public abstract class ColoredEngineChar : Display
     {
         public int framerate;
         public bool enabled;
         public int ScreenWidth, ScreenHeight;
-        char[] pixels;
+        CHAR_INFO[] pixels;
+        SMALL_RECT rect;
         Thread gameLoop;
         Timer frameTimer;
         long startTime;
@@ -34,11 +36,15 @@ namespace ConsoleEngine
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             lastUpdateTime = DateTime.Now;
-            pixels = new char[Width * Height];
+            pixels = new CHAR_INFO[Width * Height];
+
+            rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
+            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
 
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = ' ';
+                pixels[i].UnicodeChar = (short)' ';
+                pixels[i].Attributes = 0x0000;
             }
         }
 
@@ -88,22 +94,25 @@ namespace ConsoleEngine
 
         public void Resize(int width, int height)
         {
-            pixels = new char[width * height];
+            pixels = new CHAR_INFO[width * height];
             ScreenWidth = width;
             ScreenHeight = height;
             Console.SetWindowSize(width, height);
+            rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
+            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
         }
 
         public char GetPixel(int x, int y)
         {
-            return pixels[y * ScreenWidth + x];
+            return (char)pixels[y * ScreenWidth + x].UnicodeChar;
         }
 
-        public void Clear(char pixel)
+        public void Clear(char pixel, ushort color = 0x0000)
         {
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = pixel;
+                pixels[i].UnicodeChar = (short)pixel;
+                pixels[i].Attributes = color;
             }
         }
 
@@ -111,41 +120,19 @@ namespace ConsoleEngine
         {
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
-            VisualOutput.ScreenBuilder.Clear();
-            for (int y = 0; y < ScreenHeight; y++)
-            {
-                /*for (int x = 0; x < ScreenWidth; x++)
-                {
-                    char p = GetPixel(x, y);
-                    VisualOutput.ScreenBuilder.Append(p);
-                }*/
-                VisualOutput.ScreenBuilder.AppendLine(new string(pixels, ScreenWidth * y, ScreenWidth));
-                //VisualOutput.ScreenBuilder.AppendLine();
-            }
-            switch (currentRenderType)
-            {
-                case RenderType.Default:
-                    {
-                        Console.WriteLine(VisualOutput.ScreenBuilder.ToString());
-                    }
-                    break;
-                case RenderType.Stream:
-                    {
-                        VisualOutput.WriteLine(VisualOutput.ScreenBuilder.ToString());
-                        VisualOutput.Flush();
-                    }
-                    break;
-            }
+
+            WriteConsoleOutput(ConsoleHandle, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
         }
 
-        public void Draw(int x, int y, char p)
+        public void Draw(int x, int y, char p = '█', ushort color = 0x0000)
         {
             if (x > ScreenWidth - 1 || y > ScreenHeight - 1 || x < 0 || y < 0)
                 return;
-            pixels[y * ScreenWidth + x] = p;
+            pixels[y * ScreenWidth + x].UnicodeChar = (short)p;
+            pixels[y * ScreenWidth + x].Attributes = color;
         }
 
-        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p)
+        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p = '█', ushort color = 0x0000)
         {
             int w = xEnd - xStart;
             int h = yEnd - yStart;
@@ -165,7 +152,7 @@ namespace ConsoleEngine
             int numerator = longest >> 1;
             for (int i = 0; i <= longest; i++)
             {
-                Draw(xStart, yStart, p);
+                Draw(xStart, yStart, p, color);
                 numerator += shortest;
                 if (!(numerator < longest))
                 {
@@ -181,36 +168,36 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawRect(int x, int y, int width, int height, char p)
+        public void DrawRect(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
         {
-            DrawLine(x, y, x + width - 1, y, p);
-            DrawLine(x + width - 1, y, x + width - 1, y + height - 1, p);
-            DrawLine(x + width - 1, y + height - 1, x, y + height - 1, p);
-            DrawLine(x, y + height - 1, x, y, p);
+            DrawLine(x, y, x + width - 1, y, p, color);
+            DrawLine(x + width - 1, y, x + width - 1, y + height - 1, p, color);
+            DrawLine(x + width - 1, y + height - 1, x, y + height - 1, p, color);
+            DrawLine(x, y + height - 1, x, y, p, color);
         }
 
-        public void FillRect(int x, int y, int width, int height, char p)
+        public void FillRect(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
         {
             for (int X = 0; X < width; X++)
             {
                 for (int Y = 0; Y < height; Y++)
                 {
-                    Draw(x + X, y + Y, p);
+                    Draw(x + X, y + Y, p, color);
                 }
             }
         }
 
-        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p)
+        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x0000)
         {
-            DrawLine(x1, y1, x2, y2, p);
-            DrawLine(x2, y2, x3, y3, p);
-            DrawLine(x3, y3, x1, y1, p);
+            DrawLine(x1, y1, x2, y2, p, color);
+            DrawLine(x2, y2, x3, y3, p, color);
+            DrawLine(x3, y3, x1, y1, p, color);
         }
 
-        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p)
+        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x0000)
         {
             void Swap(ref int a, ref int b) { int t = a; a = b; b = t; }
-            void MakeLine(int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) Draw(i, ny, p); }
+            void MakeLine(int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) Draw(i, ny, p, color); }
 
             int t1x, t2x, y, minx, maxx, t1xp, t2xp;
             bool changed1 = false;
@@ -357,7 +344,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCurve(Point[] points, char p)
+        public void DrawCurve(Point[] points, char p = '█', ushort color = 0x0000)
         {
             for (int i = 0; i < points.Length; i++)
             {
@@ -370,25 +357,25 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCircle(int x, int y, int width, int height, char p)
+        public void DrawCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
         {
             for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += 0.05)
             {
                 int px = (int)(x + width * Math.Cos(angle));
                 int py = (int)(y + height * Math.Sin(angle));
 
-                Draw(px, py, p);
+                Draw(px, py, p, color);
             }
         }
 
-        public void FillCircle(int x, int y, int width, int height, char p)
+        public void FillCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
         {
             for (int Y = -height; Y <= height; Y++)
             {
                 for (int X = -width; X <= width; X++)
                 {
                     if (X * X * height * height + Y * Y * width * width <= height * height * width * width)
-                        Draw(x + X, y + Y, p);
+                        Draw(x + X, y + Y, p, color);
                 }
             }
         }
@@ -412,11 +399,5 @@ namespace ConsoleEngine
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
-    }
-
-    public enum RenderType
-    {
-        Default = 0,
-        Stream = 1
     }
 }

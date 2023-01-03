@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using ABSoftware;
 
 namespace ConsoleEngine
@@ -126,16 +130,5 @@ namespace ConsoleEngine
         public static Pixel LightGray => FromRGB(211, 211, 211);
         public static Pixel Gray => FromRGB(169, 169, 169);
         public static Pixel DarkGray => FromRGB(128, 128, 128);
-
-        public override bool Equals(object obj)
-        {
-            if (obj.GetType().Equals(typeof(Pixel)))
-            {
-                Pixel p = (Pixel)obj;
-                return (p.R == R && p.G == G && p.B == B);
-            }
-
-            return false;
-        }
     }
 }

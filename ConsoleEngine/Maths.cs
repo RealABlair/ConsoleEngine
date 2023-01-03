@@ -117,13 +117,13 @@ namespace ABSoftware
 
         public static float InvLerp(float start, float end, float val)
         {
-            return (val - start) / (end - start);
+            return (val / start) / (end - start);
         }
 
         public static float FloatFromString(string rawFloat)
         {
-            if (rawFloat.Contains(","))
-                rawFloat.Replace(",", ".");
+            if (rawFloat.Contains("."))
+                rawFloat = rawFloat.Replace(".", ",");
 
             return float.Parse(rawFloat);
         }
