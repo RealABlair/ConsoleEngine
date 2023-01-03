@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -20,12 +20,6 @@ namespace ConsoleEngine
 
         //User Things
         public bool UpdateWithoutFocusing = true;
-        public RenderType currentRenderType { get; private set; }
-
-        public void SetRenderType(RenderType renderType)
-        {
-            currentRenderType = renderType;
-        }
 
         public void Construct(int Width, int Height, int framerate = -1)
         {
