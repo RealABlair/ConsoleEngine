@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -342,12 +342,12 @@ namespace ConsoleEngine
         {
             for (int i = 0; i < points.Length; i++)
             {
-                Draw(points[i].x, points[i].y, p);
+                Draw(points[i].x, points[i].y, p, color);
             }
 
             for (int i = 0; i < points.Length - 1; i++)
             {
-                DrawLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, p);
+                DrawLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, p, color);
             }
         }
 

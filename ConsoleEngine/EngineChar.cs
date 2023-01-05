@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using ABSoftware;
+using static ConsoleEngine.Windows;
 
 namespace ConsoleEngine
 {
@@ -9,7 +10,8 @@ namespace ConsoleEngine
         public int framerate;
         public bool enabled;
         public int ScreenWidth, ScreenHeight;
-        char[] pixels;
+        CHAR_INFO[] pixels;
+        SMALL_RECT rect;
         Thread gameLoop;
         Timer frameTimer;
         long startTime;
@@ -18,12 +20,6 @@ namespace ConsoleEngine
 
         //User Things
         public bool UpdateWithoutFocusing = true;
-        public RenderType currentRenderType { get; private set; }
-
-        public void SetRenderType(RenderType renderType)
-        {
-            currentRenderType = renderType;
-        }
 
         public void Construct(int Width, int Height, int framerate = -1)
         {
@@ -34,11 +30,15 @@ namespace ConsoleEngine
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             lastUpdateTime = DateTime.Now;
-            pixels = new char[Width * Height];
+            pixels = new CHAR_INFO[Width * Height];
+
+            rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
+            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
 
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = ' ';
+                pixels[i].UnicodeChar = (short)' ';
+                pixels[i].Attributes = 0x0000;
             }
         }
 
@@ -88,22 +88,25 @@ namespace ConsoleEngine
 
         public void Resize(int width, int height)
         {
-            pixels = new char[width * height];
+            pixels = new CHAR_INFO[width * height];
             ScreenWidth = width;
             ScreenHeight = height;
             Console.SetWindowSize(width, height);
+            rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
+            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
         }
 
         public char GetPixel(int x, int y)
         {
-            return pixels[y * ScreenWidth + x];
+            return (char)pixels[y * ScreenWidth + x].UnicodeChar;
         }
 
         public void Clear(char pixel)
         {
             for (int i = 0; i < pixels.Length; i++)
             {
-                pixels[i] = pixel;
+                pixels[i].UnicodeChar = (short)pixel;
+                pixels[i].Attributes = FG_GRAY;
             }
         }
 
@@ -111,41 +114,19 @@ namespace ConsoleEngine
         {
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
-            VisualOutput.ScreenBuilder.Clear();
-            for (int y = 0; y < ScreenHeight; y++)
-            {
-                /*for (int x = 0; x < ScreenWidth; x++)
-                {
-                    char p = GetPixel(x, y);
-                    VisualOutput.ScreenBuilder.Append(p);
-                }*/
-                VisualOutput.ScreenBuilder.AppendLine(new string(pixels, ScreenWidth * y, ScreenWidth));
-                //VisualOutput.ScreenBuilder.AppendLine();
-            }
-            switch (currentRenderType)
-            {
-                case RenderType.Default:
-                    {
-                        Console.WriteLine(VisualOutput.ScreenBuilder.ToString());
-                    }
-                    break;
-                case RenderType.Stream:
-                    {
-                        VisualOutput.WriteLine(VisualOutput.ScreenBuilder.ToString());
-                        VisualOutput.Flush();
-                    }
-                    break;
-            }
+
+            WriteConsoleOutput(ConsoleHandle, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
         }
 
-        public void Draw(int x, int y, char p)
+        public void Draw(int x, int y, char p = '█')
         {
             if (x > ScreenWidth - 1 || y > ScreenHeight - 1 || x < 0 || y < 0)
                 return;
-            pixels[y * ScreenWidth + x] = p;
+            pixels[y * ScreenWidth + x].UnicodeChar = (short)p;
+            pixels[y * ScreenWidth + x].Attributes = FG_GRAY;
         }
 
-        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p)
+        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p = '█')
         {
             int w = xEnd - xStart;
             int h = yEnd - yStart;
@@ -181,7 +162,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawRect(int x, int y, int width, int height, char p)
+        public void DrawRect(int x, int y, int width, int height, char p = '█')
         {
             DrawLine(x, y, x + width - 1, y, p);
             DrawLine(x + width - 1, y, x + width - 1, y + height - 1, p);
@@ -189,7 +170,7 @@ namespace ConsoleEngine
             DrawLine(x, y + height - 1, x, y, p);
         }
 
-        public void FillRect(int x, int y, int width, int height, char p)
+        public void FillRect(int x, int y, int width, int height, char p = '█')
         {
             for (int X = 0; X < width; X++)
             {
@@ -200,14 +181,14 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p)
+        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█')
         {
             DrawLine(x1, y1, x2, y2, p);
             DrawLine(x2, y2, x3, y3, p);
             DrawLine(x3, y3, x1, y1, p);
         }
 
-        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p)
+        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█')
         {
             void Swap(ref int a, ref int b) { int t = a; a = b; b = t; }
             void MakeLine(int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) Draw(i, ny, p); }
@@ -357,7 +338,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCurve(Point[] points, char p)
+        public void DrawCurve(Point[] points, char p = '█')
         {
             for (int i = 0; i < points.Length; i++)
             {
@@ -370,7 +351,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCircle(int x, int y, int width, int height, char p)
+        public void DrawCircle(int x, int y, int width, int height, char p = '█')
         {
             for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += 0.05)
             {
@@ -381,7 +362,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void FillCircle(int x, int y, int width, int height, char p)
+        public void FillCircle(int x, int y, int width, int height, char p = '█')
         {
             for (int Y = -height; Y <= height; Y++)
             {
@@ -412,11 +393,5 @@ namespace ConsoleEngine
         public virtual void OnUpdate(float elapsedTime) { }
         public virtual void OnDestroy() { }
         #endregion
-    }
-
-    public enum RenderType
-    {
-        Default = 0,
-        Stream = 1
     }
 }
