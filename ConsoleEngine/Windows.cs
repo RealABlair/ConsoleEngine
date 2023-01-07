@@ -55,6 +55,15 @@ namespace ConsoleEngine
         public static extern bool WriteConsoleOutput(IntPtr ConsoleOutput, [MarshalAs(UnmanagedType.LPArray), In] CHAR_INFO[] lpBuffer, COORD dwBufferSize, COORD dwBufferCoord, ref SMALL_RECT lpWriteRegion);
         [DllImport(KERNEL, SetLastError = true)]
         public static extern bool SetConsoleWindowInfo(IntPtr hConsoleOutput, bool bAbsolute, [In] ref SMALL_RECT lpConsoleWindow);
+
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool ReadConsoleInput(IntPtr hConsoleInput, [Out] INPUT_RECORD[] lpBuffer, uint nLength, out uint lpNumberOfEventsRead);
+
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool GetNumberOfConsoleInputEvents(IntPtr hConsoleInput, out uint lpcNumberOfEvents);
+
+        [DllImport(USER)]
+        public static extern int GetAsyncKeyState(int vKeys);
         #endregion
 
         #region Consts
@@ -65,11 +74,17 @@ namespace ConsoleEngine
         public const int STD_INPUT_HANDLE = -10;
         public const int STD_OUTPUT_HANDLE = -11;
         public const int STD_ERROR_HANDLE = -12;
-            
+
 
         public const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
         public const uint ENABLE_QUICK_EDIT = 0x0040;
         public const uint ENABLE_EXTENDED_FLAGS = 0x0080;
+
+        public const ushort KEY_EVENT = 0x0001;
+        public const ushort MOUSE_EVENT = 0x0002;
+        public const ushort WINDOW_BUFFER_EVENT = 0x0004;
+        public const ushort MENU_EVENT = 0x0008;
+        public const ushort FOCUS_EVENT = 0x0010;
         #endregion
 
         #region Structs
@@ -86,6 +101,7 @@ namespace ConsoleEngine
                 this.Y = y;
             }
         }
+
         public struct RECT
         {
             public int left;
@@ -141,7 +157,7 @@ namespace ConsoleEngine
             GWL_STYLE = -16,
             GWL_EXSTYLE = -20,
             GWL_USERDATA = -21,
-            GWL_ID =  -12
+            GWL_ID = -12
         }
         [Flags]
         public enum WS : uint
@@ -179,6 +195,115 @@ namespace ConsoleEngine
             public short AsciiChar;
             [FieldOffset(2)] //2 bytes seems to work properly
             public UInt16 Attributes;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct INPUT_RECORD_UNION
+        {
+            [FieldOffset(0)]
+            public KEY_EVENT_RECORD KeyEvent;
+            [FieldOffset(0)]
+            public MOUSE_EVENT_RECORD MouseEvent;
+            [FieldOffset(0)]
+            public WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
+            [FieldOffset(0)]
+            public MENU_EVENT_RECORD MenuEvent;
+            [FieldOffset(0)]
+            public FOCUS_EVENT_RECORD FocusEvent;
+        };
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct INPUT_RECORD
+        {
+            public ushort EventType;
+            public INPUT_RECORD_UNION Event;
+        };
+
+        [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
+        public struct FOCUS_EVENT_RECORD
+        {
+            [FieldOffset(0), MarshalAs(UnmanagedType.I4)]
+            int focus;
+            public bool bSetFocus => focus != 0;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MENU_EVENT_RECORD
+        {
+            public uint dwCommandId;
+        }
+
+        public struct WINDOW_BUFFER_SIZE_RECORD
+        {
+            public COORD dwSize;
+
+            public WINDOW_BUFFER_SIZE_RECORD(short x, short y)
+            {
+                this.dwSize = new COORD(x, y);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSE_EVENT_RECORD
+        {
+            //[FieldOffset(0), MarshalAs(UnmanagedType.Struct)]
+            public COORD dwMousePosition;
+            //[FieldOffset(4), MarshalAs(UnmanagedType.U4)]
+            public MouseButtonState dwButtonState;
+            //[FieldOffset(8), MarshalAs(UnmanagedType.U4)]
+            public ControlKeyState dwControlKeyState;
+            //[FieldOffset(12), MarshalAs(UnmanagedType.U4)]
+            public MouseEventFlags dwEventFlags;
+        }
+
+        [Flags]
+        public enum MouseButtonState
+        {
+            FROM_LEFT_1ST_BUTTON_PRESSED = 0x1,
+            RIGHTMOST_BUTTON_PRESSED = 0x2,
+            FROM_LEFT_2ND_BUTTON_PRESSED = 0x4,
+            FROM_LEFT_3RD_BUTTON_PRESSED = 0x8,
+            FROM_LEFT_4TH_BUTTON_PRESSED = 0x10
+        }
+
+        [Flags]
+        public enum ControlKeyState
+        {
+            RIGHT_ALT_PRESSED = 0x1,
+            LEFT_ALT_PRESSED = 0x2,
+            RIGHT_CTRL_PRESSED = 0x4,
+            LEFT_CTRL_PRESSED = 0x8,
+            SHIFT_PRESSED = 0x10,
+            NUMLOCK_ON = 0x20,
+            SCROLLLOCK_ON = 0x40,
+            CAPSLOCK_ON = 0x80,
+            ENHANCED_KEY = 0x100
+        }
+
+        [Flags]
+        public enum MouseEventFlags
+        {
+            MOUSE_MOVED = 0x1,
+            DOUBLE_CLICK = 0x2,
+            MOUSE_WHEELED = 0x4,
+            MOUSE_HWHEELED = 0x8
+        }
+
+        [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
+        public struct KEY_EVENT_RECORD
+        {
+            [FieldOffset(0), MarshalAs(UnmanagedType.Bool)]
+            public bool bKeyDown;
+            [FieldOffset(4), MarshalAs(UnmanagedType.U2)]
+            public ushort wRepeatCount;
+            [FieldOffset(6), MarshalAs(UnmanagedType.U2)]
+            public ushort wVirtualKeyCode;
+            [FieldOffset(8), MarshalAs(UnmanagedType.U2)]
+            public ushort wVirtualScanCode;
+            [FieldOffset(10)]
+            public char UnicodeChar;
+            [FieldOffset(12), MarshalAs(UnmanagedType.U4)]
+            public ControlKeyState dwControlKeyState;
         }
         #endregion
     }

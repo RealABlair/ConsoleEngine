@@ -20,9 +20,16 @@ namespace ConsoleEngine
 
         //User Things
         public bool UpdateWithoutFocusing = true;
+        public short mousePosX = 0;
+        public short mousePosY = 0;
+
+        public Mouse mouse = new Mouse();
+        public Keyboard keyboard = new Keyboard();
 
         public void Construct(int Width, int Height, int framerate = -1)
         {
+            Init();
+            keyboard.Initialize();
             AppName = GetType().Name;
             ScreenWidth = Width;
             ScreenHeight = Height;
@@ -33,7 +40,7 @@ namespace ConsoleEngine
             pixels = new CHAR_INFO[Width * Height];
 
             rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
-            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
+            SetConsoleWindowInfo(ConsoleHandleOut, true, ref rect);
 
             for (int i = 0; i < pixels.Length; i++)
             {
@@ -49,7 +56,6 @@ namespace ConsoleEngine
 
         public void Start()
         {
-            Init();
             HandlerInit(ConsoleEventCallback);
             SetCtrlHandler(handler, true);
             Console.CursorVisible = false;
@@ -75,6 +81,7 @@ namespace ConsoleEngine
                     if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
                         continue;
 
+                    ReadInput();
                     DateTime dt = DateTime.Now;
                     OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
                     lastUpdateTime = dt;
@@ -86,6 +93,50 @@ namespace ConsoleEngine
             }
         }
 
+        private void ReadInput()
+        {
+            uint count = 0;
+            GetNumberOfConsoleInputEvents(ConsoleHandleIn, out count);
+            INPUT_RECORD[] inputs = new INPUT_RECORD[count];
+            ReadConsoleInput(ConsoleHandleIn, inputs, count, out count);
+            for (int i = 0; i < count; i++)
+            {
+                switch (inputs[i].EventType)
+                {
+                    case FOCUS_EVENT:
+                        {
+                            isFocused = inputs[i].Event.FocusEvent.bSetFocus;
+                        }
+                        break;
+                    case MOUSE_EVENT:
+                        {
+                            switch (inputs[i].Event.MouseEvent.dwEventFlags)
+                            {
+                                case MouseEventFlags.MOUSE_MOVED:
+                                    {
+                                        mousePosX = inputs[i].Event.MouseEvent.dwMousePosition.X;
+                                        mousePosY = inputs[i].Event.MouseEvent.dwMousePosition.Y;
+                                    }
+                                    break;
+                                case 0:
+                                    {
+                                        for (int m = 0; m < 5; m++)
+                                            mouse.newMouseStamp[m] = ((ushort)inputs[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            mouse.UpdateStates();
+            keyboard.UpdateStates();
+        }
+
         public void Resize(int width, int height)
         {
             pixels = new CHAR_INFO[width * height];
@@ -93,7 +144,7 @@ namespace ConsoleEngine
             ScreenHeight = height;
             Console.SetWindowSize(width, height);
             rect = new SMALL_RECT(0, 0, (short)(ScreenWidth - 1), (short)(ScreenHeight - 1));
-            SetConsoleWindowInfo(ConsoleHandle, true, ref rect);
+            SetConsoleWindowInfo(ConsoleHandleOut, true, ref rect);
         }
 
         public char GetPixel(int x, int y)
@@ -115,7 +166,7 @@ namespace ConsoleEngine
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
 
-            WriteConsoleOutput(ConsoleHandle, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
+            WriteConsoleOutput(ConsoleHandleOut, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
         }
 
         public void Draw(int x, int y, char p = '█', ushort color = 0x0000)

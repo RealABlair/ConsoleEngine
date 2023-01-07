@@ -7,7 +7,7 @@ namespace ConsoleEngine
 {
     public class Display
     {
-        public bool isFocused { get { return (GetConsoleWindow() == GetForegroundWindow()); } }
+        public bool isFocused = true;
 
         public const int PIXEL_HEIGHT = 16;
         public const int PIXEL_WIDTH = 8;
@@ -17,7 +17,8 @@ namespace ConsoleEngine
 
         public ConsoleEventDelegate handler;
 
-        public IntPtr ConsoleHandle = IntPtr.Zero;
+        public IntPtr ConsoleHandleIn = IntPtr.Zero;
+        public IntPtr ConsoleHandleOut = IntPtr.Zero;
 
         public void HandlerInit(Func<int, bool> myMethodName)
         {
@@ -26,8 +27,9 @@ namespace ConsoleEngine
 
         public void Init()
         {
-            this.ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-            var iStdOut = GetStdHandle(STD_OUTPUT_HANDLE); GetConsoleMode(iStdOut, out var outConsoleMode); SetConsoleMode(iStdOut, outConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            this.ConsoleHandleIn = GetStdHandle(STD_INPUT_HANDLE);
+            this.ConsoleHandleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            var iStdOut = GetStdHandle(STD_OUTPUT_HANDLE); GetConsoleMode(iStdOut, out var outConsoleMode); SetConsoleMode(iStdOut, outConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | 0x0001);
             SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX));
         }
 
@@ -45,7 +47,7 @@ namespace ConsoleEngine
 
         public void QuickEditMode(bool Enable)
         {
-            IntPtr consoleHandle = GetStdHandle(STD_INPUT_HANDLE);
+            IntPtr consoleHandle = ConsoleHandleIn;
             UInt32 consoleMode;
 
             GetConsoleMode(consoleHandle, out consoleMode);
