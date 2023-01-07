@@ -34,6 +34,7 @@ namespace ConsoleEngine
             ScreenWidth = Width;
             ScreenHeight = Height;
             Console.SetWindowSize(Width, Height);
+            SetConsoleScreenBufferSize(ConsoleHandleOut, new COORD((short)ScreenWidth, (short)ScreenHeight));
             this.framerate = framerate;
             frameTimer = new Timer(1000.0f / framerate);
             lastUpdateTime = DateTime.Now;
