@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -169,7 +169,7 @@ namespace ConsoleEngine
             WriteConsoleOutput(ConsoleHandleOut, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
         }
 
-        public void Draw(int x, int y, char p = '█', ushort color = 0x0000)
+        public void Draw(int x, int y, char p = '█', ushort color = 0x000F)
         {
             if (x > ScreenWidth - 1 || y > ScreenHeight - 1 || x < 0 || y < 0)
                 return;
@@ -177,7 +177,7 @@ namespace ConsoleEngine
             pixels[y * ScreenWidth + x].Attributes = color;
         }
 
-        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p = '█', ushort color = 0x0000)
+        public void DrawLine(int xStart, int yStart, int xEnd, int yEnd, char p = '█', ushort color = 0x000F)
         {
             int w = xEnd - xStart;
             int h = yEnd - yStart;
@@ -213,7 +213,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawRect(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
+        public void DrawRect(int x, int y, int width, int height, char p = '█', ushort color = 0x000F)
         {
             DrawLine(x, y, x + width - 1, y, p, color);
             DrawLine(x + width - 1, y, x + width - 1, y + height - 1, p, color);
@@ -221,7 +221,7 @@ namespace ConsoleEngine
             DrawLine(x, y + height - 1, x, y, p, color);
         }
 
-        public void FillRect(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
+        public void FillRect(int x, int y, int width, int height, char p = '█', ushort color = 0x000F)
         {
             for (int X = 0; X < width; X++)
             {
@@ -232,14 +232,14 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x0000)
+        public void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x000F)
         {
             DrawLine(x1, y1, x2, y2, p, color);
             DrawLine(x2, y2, x3, y3, p, color);
             DrawLine(x3, y3, x1, y1, p, color);
         }
 
-        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x0000)
+        public void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, char p = '█', ushort color = 0x000F)
         {
             void Swap(ref int a, ref int b) { int t = a; a = b; b = t; }
             void MakeLine(int sx, int ex, int ny) { for (int i = sx; i <= ex; i++) Draw(i, ny, p, color); }
@@ -389,7 +389,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCurve(Point[] points, char p = '█', ushort color = 0x0000)
+        public void DrawCurve(Point[] points, char p = '█', ushort color = 0x000F)
         {
             for (int i = 0; i < points.Length; i++)
             {
@@ -402,7 +402,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void DrawCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
+        public void DrawCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x000F)
         {
             for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += 0.05)
             {
@@ -413,7 +413,7 @@ namespace ConsoleEngine
             }
         }
 
-        public void FillCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x0000)
+        public void FillCircle(int x, int y, int width, int height, char p = '█', ushort color = 0x000F)
         {
             for (int Y = -height; Y <= height; Y++)
             {
