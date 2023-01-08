@@ -405,12 +405,59 @@ namespace ConsoleEngine
 
         public void DrawCircle(int x, int y, int width, int height, char p = '█')
         {
-            for (double angle = 0.000001; angle < Maths.DegreesToRadians(360); angle += 0.05)
-            {
-                int px = (int)(x + width * Math.Cos(angle));
-                int py = (int)(y + height * Math.Sin(angle));
+            float dx, dy, d1, d2, x1, y1;
+            x1 = 0;
+            y1 = height;
 
-                Draw(px, py, p);
+            d1 = (height * height) - (width * width * height) + (0.25f * width * width);
+            dx = 2 * height * height * x1;
+            dy = 2 * width * width * y1;
+
+            while (dx < dy)
+            {
+                Draw((int)(x1 + x), (int)(y1 + y), p);
+                Draw((int)(-x1 + x), (int)(y1 + y), p);
+                Draw((int)(x1 + x), (int)(-y1 + y), p);
+                Draw((int)(-x1 + x), (int)(-y1 + y), p);
+
+                if (d1 < 0)
+                {
+                    x1++;
+                    dx = dx + (2 * height * height);
+                    d1 = d1 + dx + (height * height);
+                }
+                else
+                {
+                    x1++;
+                    y1--;
+                    dx = dx + (2 * height * height);
+                    dy = dy - (2 * width * width);
+                    d1 = d1 + dx - dy + (height * height);
+                }
+            }
+            d2 = ((height * height) * ((x1 + 0.5f) * (x1 + 0.5f))) + ((width * width) * ((y1 - 1f) * (y1 - 1f))) - (width * width * height * height);
+
+            while (y1 >= 0)
+            {
+                Draw((int)(x1 + x), (int)(y1 + y), p);
+                Draw((int)(-x1 + x), (int)(y1 + y), p);
+                Draw((int)(x1 + x), (int)(-y1 + y), p);
+                Draw((int)(-x1 + x), (int)(-y1 + y), p);
+
+                if (d2 > 0)
+                {
+                    y1--;
+                    dy = dy - (2 * width * width);
+                    d2 = d2 + (width * width) - dy;
+                }
+                else
+                {
+                    y1--;
+                    x1++;
+                    dx = dx + (2 * height * height);
+                    dy = dy - (2 * width * width);
+                    d2 = d2 + dx - dy + (width * width);
+                }
             }
         }
 

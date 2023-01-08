@@ -33,8 +33,6 @@ namespace ConsoleEngine
             SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX));
         }
 
-        readonly StringBuilder sb = new StringBuilder();
-
         public void ChangeFont(int Width, int Height, string FontName = "Consolas")
         {
             CONSOLE_FONT_INFO_EX ConsoleFontInfo = new CONSOLE_FONT_INFO_EX();

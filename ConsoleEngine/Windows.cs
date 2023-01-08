@@ -64,6 +64,9 @@ namespace ConsoleEngine
 
         [DllImport(USER)]
         public static extern int GetAsyncKeyState(int vKeys);
+
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool SetConsoleScreenBufferSize(IntPtr hConsoleOutput, COORD dwSize);
         #endregion
 
         #region Consts
