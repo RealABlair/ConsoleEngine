@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -482,6 +482,19 @@ namespace ConsoleEngine
             }
             return false;
         }
+
+        #region Math
+        public float Sinf(float a) => (float)Math.Sin(a);
+        public float Cosf(float a) => (float)Math.Cos(a);
+        public float Tanf(float a) => (float)Math.Tan(a);
+        public float Asinf(float d) => (float)Math.Asin(d);
+        public float Acosf(float d) => (float)Math.Acos(d);
+        public float Atanf(float d) => (float)Math.Atan(d);
+        public float Atan2f(float y, float x) => (float)Math.Atan2(y, x);
+        public float Absf(float value) => Math.Abs(value);
+        public float PI => (float)Math.PI;
+        public float PI2 => PI * 2f;
+        #endregion
 
         #region Overrides
         public virtual void OnCreate() { }
