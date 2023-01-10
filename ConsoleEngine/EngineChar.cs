@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -157,6 +157,11 @@ namespace ConsoleEngine
         public char GetPixel(int x, int y)
         {
             return (char)pixels[y * ScreenWidth + x].UnicodeChar;
+        }
+
+        public ushort GetPixelColor(int x, int y)
+        {
+            return pixels[y * ScreenWidth + x].Attributes;
         }
 
         public void Clear(char pixel)
