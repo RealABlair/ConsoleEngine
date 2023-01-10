@@ -5,9 +5,13 @@ namespace ConsoleEngine
     public class Mouse
     {
         public Input[] mouseInput { get; private set; } = new Input[5];
+        public Input mouseWheel = new Input();
 
         private bool[] oldStamp = new bool[5];
+
         public bool[] newMouseStamp = new bool[5];
+        public bool newMwheelUp = false;
+        public bool newMwheelDown = false;
 
         public void UpdateStates()
         {
@@ -44,6 +48,13 @@ namespace ConsoleEngine
                 }
                 this.oldStamp[i] = newStamp[i];
             }
+
+            mouseWheel.isDown = this.newMwheelDown;
+            mouseWheel.isUp = this.newMwheelUp;
+            mouseWheel.isHeld = false;
+
+            this.newMwheelUp = false;
+            this.newMwheelDown = false;
         }
 
         public Input GetInput(int index)

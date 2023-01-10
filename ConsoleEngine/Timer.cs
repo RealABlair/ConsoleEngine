@@ -24,6 +24,7 @@ namespace ConsoleEngine
             return false;
         }
 
+        public void SetInterval(float interval) => this.Interval = interval;
         public void Init() => lastTickTime = DateTime.Now;
         public void Init(DateTime dt) => lastTickTime = dt;
     }

@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -123,6 +124,12 @@ namespace ConsoleEngine
                                     {
                                         for (int m = 0; m < 5; m++)
                                             mouse.newMouseStamp[m] = ((ushort)inputs[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
+                                    }
+                                    break;
+                                case MouseEventFlags.MOUSE_WHEELED:
+                                    {
+                                        mouse.newMwheelUp = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) != 0);
+                                        mouse.newMwheelDown = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) == 0);
                                     }
                                     break;
                                 default:
