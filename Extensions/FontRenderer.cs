@@ -143,7 +143,7 @@ namespace Fonts
 
         public static int GetStringWidth(string text, float scaleX = 1f)
         {
-            return (int)(currentFont.CharWidth * text.Length * scaleX);
+            return (int)(currentFont.CharWidth * text.Length * scaleX) + (charsGap * text.Length);
         }
 
         public static Action<int,int,char,ushort> ColoredDraw { get; set; }
