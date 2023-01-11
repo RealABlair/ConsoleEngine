@@ -2,7 +2,7 @@ using System;
 using ABSoftware.Structures;
 using ConsoleEngine;
 
-namespace ConsoleEngine.Fonts
+namespace Fonts
 {
     public class FontRenderer
     {
@@ -47,7 +47,7 @@ namespace ConsoleEngine.Fonts
             FontRenderer.charsGap = charsGap;
         }
 
-        public static void DrawText(int x, int y, string text, char p, EngineChar engine)
+        public static void DrawText(int x, int y, string text, char p, ushort color = 0x000F)
         {
             if (currentFont == null)
                 return;
@@ -61,13 +61,22 @@ namespace ConsoleEngine.Fonts
                     {
                         Pixel pix = character.GetPixel(cx, cy);
                         if(pix.R > 0 && pix.G > 0 && pix.B > 0)
-                            engine.Draw(x + cx + (i*character.Width) + (i*charsGap), y + cy, p);
+                        {
+                            if(Draw != null)
+                            {
+                                Draw.Invoke(x + cx + (i * character.Width) + (i * charsGap), y + cy, p);
+                            }
+                            else if(ColoredDraw != null)
+                            {
+                                ColoredDraw.Invoke(x + cx + (i * character.Width) + (i * charsGap), y + cy, p, color);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        public static void DrawText(float x, float y, string text, char p, EngineChar engine, float scaleX = 1f, float scaleY = 1f)
+        public static void DrawText(float x, float y, string text, char p, ushort color = 0x000F, float scaleX = 1f, float scaleY = 1f)
         {
             if (currentFont == null)
                 return;
@@ -78,12 +87,12 @@ namespace ConsoleEngine.Fonts
                 Translate(-x, -y);
                 Translate(x + (i * character.Width) + (i * charsGap), y);
                 Scale(scaleX, scaleY);
-                DrawSprite(x, y, character, p, engine);
+                DrawSprite(x, y, character, p, color);
                 fontMatrix.Identity();
             }
         }
 
-        static void DrawSprite(float x, float y, Sprite sprite, char p, EngineChar engine)
+        static void DrawSprite(float x, float y, Sprite sprite, char p, ushort color = 0x000F)
         {
             Translate(x, y);
             Matrix3 matFinalInv = fontMatrix.Invert();
@@ -118,7 +127,16 @@ namespace ConsoleEngine.Fonts
                         continue;
                     Pixel pix = sprite.GetPixel((int)(nx), (int)(ny));
                     if (pix.R > 0 && pix.G > 0 && pix.B > 0)
-                        engine.Draw(ix, iy, p);
+                    {
+                        if (Draw != null)
+                        {
+                            Draw.Invoke(ix, iy, p);
+                        }
+                        else if (ColoredDraw != null)
+                        {
+                            ColoredDraw.Invoke(ix, iy, p, color);
+                        }
+                    }
                 }
             }
         }
@@ -127,5 +145,8 @@ namespace ConsoleEngine.Fonts
         {
             return (int)(currentFont.CharWidth * text.Length * scaleX);
         }
+
+        public static Action<int,int,char,ushort> ColoredDraw { get; set; }
+        public static Action<int,int,char> Draw { get; set; }
     }
 }
