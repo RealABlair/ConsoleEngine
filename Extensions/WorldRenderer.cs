@@ -2,7 +2,7 @@ using System;
 using ABSoftware.Structures;
 using ConsoleEngine;
 
-namespace FallingSand.Render
+namespace Render
 {
     public class WorldRenderer
     {
