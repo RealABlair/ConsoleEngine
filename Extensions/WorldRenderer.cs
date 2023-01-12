@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FallingSand.Structures;
+using System;
+using ABSoftware.Structures;
 using ConsoleEngine;
-using System.Diagnostics;
-using ABSoftware;
 
 namespace FallingSand.Render
 {
