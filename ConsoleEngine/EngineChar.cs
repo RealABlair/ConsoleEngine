@@ -509,6 +509,8 @@ namespace ConsoleEngine
         public float Atanf(float d) => (float)Math.Atan(d);
         public float Atan2f(float y, float x) => (float)Math.Atan2(y, x);
         public float Absf(float value) => Math.Abs(value);
+        public float RadToDeg(float radians) => (radians / PI) * 180f;
+        public float DegToRad(float degrees) => (degrees / 180f) * PI;
         public float PI => (float)Math.PI;
         public float PI2 => PI * 2f;
         #endregion
