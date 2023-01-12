@@ -125,6 +125,12 @@ namespace ConsoleEngine
                                             mouse.newMouseStamp[m] = ((ushort)inputs[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
                                     }
                                     break;
+                                case MouseEventFlags.DOUBLE_CLICK:
+                                    {
+                                        for (int m = 0; m < 5; m++)
+                                            mouse.newMouseStamp[m] = ((ushort)inputs[i].Event.MouseEvent.dwButtonState & (1 << m)) > 0;
+                                    }
+                                    break;
                                 case MouseEventFlags.MOUSE_WHEELED:
                                     {
                                         mouse.newMwheelUp = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) != 0);
