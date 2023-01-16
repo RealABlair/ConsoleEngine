@@ -512,6 +512,8 @@ namespace ConsoleEngine
         public float Absf(float value) => Math.Abs(value);
         public float RadToDeg(float radians) => (radians / PI) * 180f;
         public float DegToRad(float degrees) => (degrees / 180f) * PI;
+        public float Maxf(float a, float b) => (a > b) ? a : b;
+        public float Minf(float a, float b) => (a < b) ? a : b;
         public float PI => (float)Math.PI;
         public float PI2 => PI * 2f;
         #endregion
