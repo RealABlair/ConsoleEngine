@@ -146,6 +146,11 @@ namespace Fonts
             return (int)(currentFont.CharWidth * text.Length * scaleX) + (charsGap * text.Length);
         }
 
+        public static int GetStringHeight(float scaleY = 1f)
+        {
+            return (int)(currentFont.CharHeight * scaleY);
+        }
+        
         public static Action<int,int,char,ushort> ColoredDraw { get; set; }
         public static Action<int,int,char> Draw { get; set; }
     }
