@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using static ConsoleEngine.Windows;
@@ -19,6 +19,7 @@ namespace ConsoleEngine
 
         public IntPtr ConsoleHandleIn = IntPtr.Zero;
         public IntPtr ConsoleHandleOut = IntPtr.Zero;
+        public IntPtr ConsoleHWND = IntPtr.Zero;
 
         public void HandlerInit(Func<int, bool> myMethodName)
         {
@@ -29,8 +30,9 @@ namespace ConsoleEngine
         {
             this.ConsoleHandleIn = GetStdHandle(STD_INPUT_HANDLE);
             this.ConsoleHandleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            this.ConsoleHWND = GetConsoleWindow();
             var iStdOut = GetStdHandle(STD_OUTPUT_HANDLE); GetConsoleMode(iStdOut, out var outConsoleMode); SetConsoleMode(iStdOut, outConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | 0x0001);
-            SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX));
+            SetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE, (uint)((GetWindowLong(GetConsoleWindow(), (int)GWL.GWL_STYLE)) & ~(int)WS.WS_MAXIMIZEBOX & ~(int)WS.WS_SIZEFRAME));
         }
 
         public void ChangeFont(int Width, int Height, string FontName = "Consolas")
@@ -61,7 +63,7 @@ namespace ConsoleEngine
 
         public void Move(int x, int y, int width, int height)
         {
-            MoveWindow(GetConsoleWindow(), x, y, width, height, true);
+            MoveWindow(this.ConsoleHWND, x, y, width, height, true);
         }
 
         public void SetCtrlHandler(ConsoleEventDelegate callback, bool add)
@@ -72,14 +74,14 @@ namespace ConsoleEngine
         public RECT GetClientRectangle()
         {
             RECT tmp = new RECT();
-            GetClientRect(GetConsoleWindow(), out tmp);
+            GetClientRect(this.ConsoleHWND, out tmp);
             return tmp;
         }
 
         public RECT GetWindowRectangle()
         {
             RECT tmp = new RECT();
-            GetWindowRect(GetConsoleWindow(), ref tmp);
+            GetWindowRect(this.ConsoleHWND, ref tmp);
             return tmp;
         }
 
