@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.IO;
 using ConsoleEngine;
 using ABSoftware;
 
-namespace ConsoleEngine.Fonts
+namespace Fonts
 {
     public class Font
     {
@@ -22,15 +22,15 @@ namespace ConsoleEngine.Fonts
         public void Load(string fileName)
         {
             Sprite font = new Sprite(fileName);
-            for(int i = 0; i < FontRenderer.CHARS.Length; i++)
+            for (int i = 0; i < FontRenderer.ASCII_CHARS; i++)
             {
-                sprites.Add(font.GetRange(5*i,0,4,5));
+                sprites.Add(font.GetRange(5 * i, 0, 4, 5));
             }
         }
 
         public void Load(Sprite font)
         {
-            for (int i = 0; i < FontRenderer.CHARS.Length; i++)
+            for (int i = 0; i < FontRenderer.ASCII_CHARS; i++)
             {
                 sprites.Add(font.GetRange(5 * i, 0, 4, 5));
             }
@@ -38,9 +38,9 @@ namespace ConsoleEngine.Fonts
 
         public Sprite GetChar(char character)
         {
-            int index = FontRenderer.CHARS.IndexOf(character);
-            if (index < 0)
-                index = FontRenderer.CHARS.IndexOf(' ');
+            int index = (character - 0x20);
+            if (index < 0 || index >= FontRenderer.ASCII_CHARS)
+                index = 0;
             return sprites.Get(index);
         }
 

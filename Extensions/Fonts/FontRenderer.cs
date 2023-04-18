@@ -1,13 +1,12 @@
-using System;
-using ABSoftware.Structures;
+﻿using System;
+using Structures;
 using ConsoleEngine;
 
 namespace Fonts
 {
     public class FontRenderer
     {
-        public static string CHARS = "0123456789abcdefghijklmnopqrstuvwxyz?!,.-+=/\\*%:; ()[]";
-
+        public static int ASCII_CHARS = 95;
         public static Font currentFont { get; private set; }
         public static int charsGap = 1;
 
@@ -52,21 +51,21 @@ namespace Fonts
             if (currentFont == null)
                 return;
             text = text.ToLower();
-            for(int i = 0; i < text.Length; i++)
+            for (int i = 0; i < text.Length; i++)
             {
                 Sprite character = currentFont.GetChar(text[i]);
-                for(int cx = 0; cx < character.Width; cx++)
+                for (int cx = 0; cx < character.Width; cx++)
                 {
                     for (int cy = 0; cy < character.Height; cy++)
                     {
                         Pixel pix = character.GetPixel(cx, cy);
-                        if(pix.R > 0 && pix.G > 0 && pix.B > 0)
+                        if (pix.R > 0 && pix.G > 0 && pix.B > 0)
                         {
-                            if(Draw != null)
+                            if (Draw != null)
                             {
                                 Draw.Invoke(x + cx + (i * character.Width) + (i * charsGap), y + cy, p);
                             }
-                            else if(ColoredDraw != null)
+                            else if (ColoredDraw != null)
                             {
                                 ColoredDraw.Invoke(x + cx + (i * character.Width) + (i * charsGap), y + cy, p, color);
                             }
@@ -150,8 +149,8 @@ namespace Fonts
         {
             return (int)(currentFont.CharHeight * scaleY);
         }
-        
-        public static Action<int,int,char,ushort> ColoredDraw { get; set; }
-        public static Action<int,int,char> Draw { get; set; }
+
+        public static Action<int, int, char, ushort> ColoredDraw { get; set; }
+        public static Action<int, int, char> Draw { get; set; }
     }
 }
