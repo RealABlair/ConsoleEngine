@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace ABSoftware
 {
@@ -148,7 +148,7 @@ namespace ABSoftware
 
         public void Remove(int startIndex, int length)
         {
-            Array.Copy(this.data, startIndex+length, this.data, startIndex, this.Size - startIndex - length);
+            Array.Copy(this.data, startIndex + length, this.data, startIndex, this.Size - startIndex - length);
             Array.Resize(ref this.data, this.Size - length);
         }
 
@@ -176,7 +176,7 @@ namespace ABSoftware
 
         public static string ToString(byte[] array)
         {
-            string text = "";
+            string text = string.Empty;
             for (int i = 0; i < array.Length; i++)
             {
                 if (i < array.Length - 1)
@@ -189,7 +189,7 @@ namespace ABSoftware
 
         public override string ToString()
         {
-            string text = "";
+            string text = string.Empty;
             for (int i = 0; i < this.data.Length; i++)
             {
                 if (i < this.data.Length - 1)

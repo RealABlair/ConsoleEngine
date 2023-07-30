@@ -67,6 +67,10 @@ namespace ConsoleEngine
 
         [DllImport(KERNEL, SetLastError = true)]
         public static extern bool SetConsoleScreenBufferSize(IntPtr hConsoleOutput, COORD dwSize);
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX ConsoleScreenBufferInfo);
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX ConsoleScreenBufferInfo);
         #endregion
 
         #region Consts
@@ -307,6 +311,23 @@ namespace ConsoleEngine
             public char UnicodeChar;
             [FieldOffset(12), MarshalAs(UnmanagedType.U4)]
             public ControlKeyState dwControlKeyState;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CONSOLE_SCREEN_BUFFER_INFO_EX
+        {
+            public uint cbSize;
+            public COORD dwSize;
+            public COORD dwCursorPosition;
+            public short wAttributes;
+            public SMALL_RECT srWindow;
+            public COORD dwMaximumWindowSize;
+
+            public ushort wPopupAttributes;
+            public bool bFullscreenSupported;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            public uint[] ColorTable;
         }
         #endregion
     }

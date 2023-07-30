@@ -1,5 +1,4 @@
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -15,7 +14,6 @@ namespace ConsoleEngine
         SMALL_RECT rect;
         Thread gameLoop;
         Timer frameTimer;
-        long startTime;
         DateTime lastUpdateTime = DateTime.Now;
         public string AppName { get { return Console.Title; } set { Console.Title = value; } }
 
@@ -51,18 +49,12 @@ namespace ConsoleEngine
             }
         }
 
-        public long GetCurrentTimeMillis()
-        {
-            return startTime;
-        }
-
         public void Start()
         {
             HandlerInit(ConsoleEventCallback);
             SetCtrlHandler(handler, true);
             Console.CursorVisible = false;
             enabled = true;
-            startTime = 0;
             gameLoop = new Thread(GameLoop);
             gameLoop.Start();
         }
@@ -78,21 +70,17 @@ namespace ConsoleEngine
             OnCreate();
             while (enabled)
             {
-                while (enabled)
-                {
-                    if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
-                        continue;
+                if (!frameTimer.Tick() || !UpdateWithoutFocusing && !isFocused)
+                    continue;
 
-                    ReadInput();
-                    DateTime dt = DateTime.Now;
-                    OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
-                    lastUpdateTime = dt;
-                    Redraw();
-                    startTime++;
-                }
-
-                OnDestroy();
+                ReadInput();
+                DateTime dt = DateTime.Now;
+                OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
+                lastUpdateTime = dt;
+                Redraw();
             }
+
+            OnDestroy();
         }
 
         private void ReadInput()
@@ -134,8 +122,9 @@ namespace ConsoleEngine
                                     break;
                                 case MouseEventFlags.MOUSE_WHEELED:
                                     {
-                                        mouse.newMwheelUp = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) != 0);
-                                        mouse.newMwheelDown = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) == 0);
+                                        short direction = (short)((int)inputs[i].Event.MouseEvent.dwButtonState >> 16);
+                                        mouse.newMwheelUp = direction > 0;
+                                        mouse.newMwheelDown = direction < 0;
                                     }
                                     break;
                                 default:
@@ -184,8 +173,7 @@ namespace ConsoleEngine
         {
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
-
-            WriteConsoleOutput(ConsoleHandleOut, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
+            WriteConsoleOutput(this.ConsoleHandleOut, pixels, new COORD((short)ScreenWidth, (short)ScreenHeight), new COORD(0, 0), ref rect);
         }
 
         public void Draw(int x, int y, char p = '█', ushort color = 0x000F)

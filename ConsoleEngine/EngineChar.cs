@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using ABSoftware;
 using static ConsoleEngine.Windows;
@@ -14,7 +14,6 @@ namespace ConsoleEngine
         SMALL_RECT rect;
         Thread gameLoop;
         Timer frameTimer;
-        long startTime;
         DateTime lastUpdateTime = DateTime.Now;
         public string AppName { get { return Console.Title; } set { Console.Title = value; } }
 
@@ -49,18 +48,12 @@ namespace ConsoleEngine
             }
         }
 
-        public long GetCurrentTimeMillis()
-        {
-            return startTime;
-        }
-
         public void Start()
         {
             HandlerInit(ConsoleEventCallback);
             SetCtrlHandler(handler, true);
             Console.CursorVisible = false;
             enabled = true;
-            startTime = 0;
             gameLoop = new Thread(GameLoop);
             gameLoop.Start();
         }
@@ -86,7 +79,6 @@ namespace ConsoleEngine
                     OnUpdate((float)(dt - lastUpdateTime).TotalSeconds);
                     lastUpdateTime = dt;
                     Redraw();
-                    startTime++;
                 }
                 
 
@@ -133,8 +125,9 @@ namespace ConsoleEngine
                                     break;
                                 case MouseEventFlags.MOUSE_WHEELED:
                                     {
-                                        mouse.newMwheelUp = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) != 0);
-                                        mouse.newMwheelDown = (((int)inputs[i].Event.MouseEvent.dwButtonState & (1 << 20)) == 0);
+                                        short direction = (short)((int)inputs[i].Event.MouseEvent.dwButtonState >> 16);
+                                        mouse.newMwheelUp = direction > 0;
+                                        mouse.newMwheelDown = direction < 0;
                                     }
                                     break;
                                 default:

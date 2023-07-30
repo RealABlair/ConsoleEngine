@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using static ConsoleEngine.Windows;
@@ -43,6 +43,58 @@ namespace ConsoleEngine
             ConsoleFontInfo.dwFontSize.X = (short)Width;
             ConsoleFontInfo.dwFontSize.Y = (short)Height;
             SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, ref ConsoleFontInfo);
+        }
+
+        public bool ChangePaletteHex(byte paletteColorIndex, uint hexColor)
+        {
+            return ChangePalette(paletteColorIndex, RGB(hexColor));
+        }
+
+        public bool ChangePaletteHex(uint[] newHexPalette)
+        {
+            for (int i = 0; i < newHexPalette.Length; i++) newHexPalette[i] = RGB(newHexPalette[i]);
+            return ChangePalette(newHexPalette);
+        }
+
+        public bool ChangePalette(byte paletteColorIndex, uint color)
+        {
+            CONSOLE_SCREEN_BUFFER_INFO_EX csbix = new CONSOLE_SCREEN_BUFFER_INFO_EX();
+            csbix.cbSize = (uint)Marshal.SizeOf(csbix);
+            if (!GetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref csbix)) return false;
+            csbix.srWindow.Bottom++;
+            
+            csbix.ColorTable[paletteColorIndex] = color;
+
+            if (!SetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref csbix)) return false;
+
+            return true;
+        }
+
+        public bool ChangePalette(uint[] newPalette)
+        {
+            CONSOLE_SCREEN_BUFFER_INFO_EX csbix = new CONSOLE_SCREEN_BUFFER_INFO_EX();
+            csbix.cbSize = (uint)Marshal.SizeOf(csbix);
+            if (!GetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref csbix)) return false;
+            csbix.srWindow.Bottom++;
+            csbix.ColorTable = newPalette;
+
+            if (!SetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref csbix)) return false;
+
+            return true;
+        }
+
+        public bool GetScreenBufferInfo(out CONSOLE_SCREEN_BUFFER_INFO_EX buffer)
+        {
+            buffer = new CONSOLE_SCREEN_BUFFER_INFO_EX();
+            buffer.cbSize = (uint)Marshal.SizeOf(buffer);
+            bool flag = GetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref buffer);
+            buffer.srWindow.Bottom++;
+            return flag;
+        }
+
+        public bool SetScreenBufferInfo(CONSOLE_SCREEN_BUFFER_INFO_EX buffer)
+        {
+            return SetConsoleScreenBufferInfoEx(this.ConsoleHandleOut, ref buffer);
         }
 
         public void QuickEditMode(bool Enable)
@@ -136,6 +188,29 @@ namespace ConsoleEngine
         public const ushort BG_MAGENTA = 0x00D0;
         public const ushort BG_YELLOW = 0x00E0;
         public const ushort BG_WHITE = 0x00F0;
+
+        public const byte PALETTE_BLACK = 0x00;
+        public const byte PALETTE_DARK_BLUE = 0x01;
+        public const byte PALETTE_DARK_GREEN = 0x02;
+        public const byte PALETTE_DARK_CYAN = 0x03;
+        public const byte PALETTE_DARK_RED = 0x04;
+        public const byte PALETTE_DARK_MAGENTA = 0x05;
+        public const byte PALETTE_DARK_YELLOW = 0x06;
+        public const byte PALETTE_GRAY = 0x07;
+        public const byte PALETTE_DARK_GRAY = 0x08;
+        public const byte PALETTE_BLUE = 0x09;
+        public const byte PALETTE_GREEN = 0x0A;
+        public const byte PALETTE_CYAN = 0x0B;
+        public const byte PALETTE_RED = 0x0C;
+        public const byte PALETTE_MAGENTA = 0x0D;
+        public const byte PALETTE_YELLOW = 0x0E;
+        public const byte PALETTE_WHITE = 0x0F;
+
+        public uint RGB(byte r, byte g, byte b) => (uint)(r | (g << 8) | (b << 16));
+        public uint RGB(uint hex) => (uint)((hex >> 16) & 0xFF | (hex & 0xFF) << 16 | hex & 0xFF00);
+
+        public uint[] DefaultPaletteHEX { get { return new uint[] { 0x000000, 0x000080, 0x008000, 0x008080, 0x800000, 0x800080, 0x808000, 0xC0C0C0, 0x808080, 0x0000FF, 0x00FF00, 0x00FFFF, 0xFF0000, 0xFF00FF, 0xFFFF00, 0xFFFFFF }; } }
+        public uint[] DefaultPaletteRGB { get { return new uint[] { 0x000000, 0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xC0C0C0, 0x808080, 0xFF0000, 0x00FF00, 0xFFFF00, 0x0000FF, 0xFF00FF, 0x00FFFF, 0xFFFFFF }; } }
         #endregion
     }
 }

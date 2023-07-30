@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleEngine
 {
-    internal class Timer
+    public class Timer
     {
         public Timer(float interval) => Interval = interval;
 

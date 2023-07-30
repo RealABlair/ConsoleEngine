@@ -7,18 +7,18 @@ using ABSoftware;
 
 namespace ConsoleEngine
 {
-    public class Pixel
+    public struct Pixel
     {
         public byte R { get; set; }
         public byte G { get; set; }
         public byte B { get; set; }
 
 
-        public Pixel()
+        public Pixel(byte R = 0, byte G = 0, byte B = 0)
         {
-            this.R = 0;
-            this.G = 0;
-            this.B = 0;
+            this.R = R;
+            this.G = G;
+            this.B = B;
         }
 
         public static Pixel FromRGB(byte r, byte g, byte b)

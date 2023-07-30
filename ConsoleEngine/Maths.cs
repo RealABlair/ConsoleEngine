@@ -10,7 +10,7 @@ namespace ABSoftware
     {
         public static string ToHex(int number)
         {
-            string hex = "";
+            string hex = string.Empty;
             double lastDiv = number;
             while ((int)lastDiv != 0)
             {
@@ -27,7 +27,7 @@ namespace ABSoftware
 
         public static string ToHex(long number)
         {
-            string hex = "";
+            string hex = string.Empty;
             double lastDiv = number;
             while ((int)lastDiv != 0)
             {
@@ -126,16 +126,6 @@ namespace ABSoftware
                 rawFloat = rawFloat.Replace(".", ",");
 
             return float.Parse(rawFloat);
-        }
-
-        public class Random
-        {
-            static System.Random rnd = new System.Random();
-
-            public static float Range(float start, float end)
-            {
-                return Lerp(start, end, (float)rnd.NextDouble());
-            }
         }
 
         private static char HEX_CHARS(int integer)

@@ -10,7 +10,7 @@ namespace ConsoleEngine
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        Pixel[] pixels;
+        public Pixel[] pixels;
 
         public Sprite(int Width = 0, int Height = 0)
         {
@@ -21,6 +21,11 @@ namespace ConsoleEngine
             {
                 pixels[i] = new Pixel();
             }
+        }
+
+        ~Sprite()
+        {
+            Array.Clear(pixels, 0, pixels.Length);
         }
 
         public void SetPixel(int x, int y, Pixel p)
@@ -102,6 +107,7 @@ namespace ConsoleEngine
                     pixelId++;
                 }
             }
+            Array.Clear(palette, 0, palette.Length);
         }
 
         public Sprite GetRange(int x, int y, int width, int height)
